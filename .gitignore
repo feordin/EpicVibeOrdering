@@ -4,3 +4,4 @@ __pycache__/
 .superpowers/
 audit.db
 .env
+.epicSandboxSecrets
