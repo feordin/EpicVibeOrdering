@@ -1,1 +1,6 @@
-venv\n__pycache__\n*.egg-info\n.superpowers/\naudit.db\n.env
+.venv/
+__pycache__/
+*.egg-info/
+.superpowers/
+audit.db
+.env
