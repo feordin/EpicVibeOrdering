@@ -61,7 +61,9 @@ async def patient_view(request: Request) -> dict:
         body = await request.json()
         key = cache_key(body["context"])
         vp = state.cache.get(key)
-        if vp is not None and not vp.is_empty:
+        if vp is not None:
+            if vp.is_empty:
+                return {"cards": []}
             return {"cards": [render_summary_card(vp)]}
         _enqueue_generate(state, key, body["context"], body.get("prefetch", {}))
     except Exception:

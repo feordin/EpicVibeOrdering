@@ -70,3 +70,16 @@ async def test_feedback_endpoint():
                          json={"feedback": [{"card": "u1", "outcome": "accepted"}]})
         assert r.status_code == 200
         assert app.state.audit.feedback()[0]["card_uuid"] == "u1"
+
+async def test_patient_view_cached_empty_does_not_reenqueue():
+    provider = FakeProvider({"order_sets": [], "confidence": "low"})
+    app = create_app(Settings(_env_file=None, audit_db_path=":memory:"), provider=provider)
+    async with _client(app) as c:
+        await c.post("/cds-services/epicvibe-patient-view", json=_body("patient_view"))
+        await app.state.runner.join()
+        calls_after_first = len(provider.calls)
+        r = await c.post("/cds-services/epicvibe-patient-view", json=_body("patient_view"))
+        await app.state.runner.join()
+    assert r.json() == {"cards": []}
+    assert len(provider.calls) == calls_after_first          # no second LLM call
+    assert len(app.state.audit.proposals()) == 1             # no duplicate audit row
