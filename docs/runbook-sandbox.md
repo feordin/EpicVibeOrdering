@@ -52,14 +52,33 @@ curl -s -X POST http://localhost:8000/cds-services/epicvibe-order-select \
 
 **With the default `fake` inference provider, the cached proposal is empty**, so
 `order-select` keeps returning `{"cards": []}` even after warm-up — this is expected and
-was verified during Task 17 (see report). To see real suggestion cards, set:
+was verified during Task 17 (see report). Two ways to see real suggestion cards:
 
 ```
+EPICVIBE_INFERENCE_PROVIDER=demo        # deterministic DM2 proposal, no API key needed
+# or
 EPICVIBE_INFERENCE_PROVIDER=anthropic
 EPICVIBE_ANTHROPIC_API_KEY=<your key>
 ```
 
-in `.env` and restart the server before repeating the POSTs above.
+in `.env` and restart the server before repeating the POSTs above. The `demo` provider
+returns a fixed, catalog-grounded diabetes proposal for any patient — ideal for demos
+and the accept-flow walkthrough below.
+
+### Epic-dialect contract check (Layer 1)
+
+With the server running (use `demo` provider), replay Epic-shaped requests — including
+Epic's `com.epic.cdshooks.request.*` extensions, PractitionerRole user, and
+contained-Medication draft orders — and validate every response against Epic's
+documented suggestion-card rules (one action per suggestion, `selectionBehavior "any"`,
+honored code systems, etc.):
+
+```bash
+python -m epicvibe.replay --url http://localhost:8000
+```
+
+Expected: `OK` lines for all three hooks, exit code 0. Any violation names the exact
+Epic rule breached. Run this after ANY change to the card emitters or hook handlers.
 
 For an interactive demo instead of raw curl, use the CDS Hooks Sandbox flow (§2 below).
 
@@ -84,8 +103,54 @@ drives `patient-view`/`order-select` from its own UI and renders cards visually.
 
 Note: the sandbox sends its own synthetic FHIR test data via prefetch. Unless the
 selected patient happens to have an active diabetes `Condition`, the proposal engine's
-shortlist will legitimately come back empty (expected miss, not a bug) — the fixtures in
-`fixtures/hooks/` are the reliable path for exercising the "hit" case locally.
+shortlist will legitimately come back empty (expected miss, not a bug) — run with
+`EPICVIBE_INFERENCE_PROVIDER=demo` to guarantee cards regardless of the sandbox
+patient (the demo provider always returns the DM2 proposal), or use the fixtures in
+`fixtures/hooks/` for the organic "hit" case locally.
+
+### Accept-flow walkthrough (Layer 2: simulated write-back)
+
+This exercises the full suggestion-accept loop — the closest public approximation of
+Epic filing an unsigned order from our card:
+
+1. Run the server with `EPICVIBE_INFERENCE_PROVIDER=demo` and the tunnel from step 1.
+2. In the sandbox, open a patient chart — this fires `patient-view` at our service
+   (warm-up; no cards expected on the first fire).
+3. Switch to the **Rx View** (or order entry view) and select any medication — this
+   fires `order-select`. Our suggestion card should render with the five DM2 items,
+   each pre-checked (`isRecommended`).
+4. Click **Accept** on a suggestion. The sandbox applies the suggestion's `create`
+   action — the draft `ServiceRequest`/`MedicationRequest` from our card is written to
+   the sandbox's open FHIR server. This is the same mechanical contract Epic honors
+   (Epic additionally resolves our code against its own orderables and composes
+   details from its build — that part is only observable in a real Epic, §4).
+5. Verify the write: query the sandbox FHIR server for the created resource (the
+   sandbox UI shows the request; or GET the resource type filtered by patient).
+6. Watch our server logs / audit store for the `feedback` POST if the sandbox sends
+   one (Epic does in production; the public sandbox may not — absence here is not a
+   failure).
+
+What this proves: our cards are spec-valid, render correctly, and their actions apply
+cleanly. What it cannot prove: Epic's orderable resolution, Epic-side default
+composition, and OPA presentation — those are §4 items.
+
+## 3a. Meld sandbox (Layer 3: EHR-style demo)
+
+[Meld](https://meld.interop.community) (successor to the retired Logica sandbox) offers
+an EHR-like chart UI with CDS Hooks support and a persistent FHIR server — better
+stakeholder demos than the CDS Hooks Sandbox's developer UI.
+
+Setup (requires a free Meld account — **user action, one-time**):
+
+1. Create a Meld account and a sandbox (R4).
+2. In the sandbox's **CDS Hooks** settings, register our tunnel URL as a CDS service
+   (Meld reads the discovery endpoint like Epic would).
+3. Load or pick a patient with a diabetes condition (Meld supports importing synthetic
+   patients — Synthea bundles work), or run the `demo` provider to force cards.
+4. Open the patient chart to fire `patient-view`; use Meld's medication/order UI to
+   fire `order-select`; accept a suggestion and verify the created draft resource in
+   Meld's FHIR server (Data Manager view).
+5. Same JWT note as §2: keep `EPICVIBE_VERIFY_JWT=false`.
 
 ## 3. Epic FHIR sandbox (payload fidelity)
 
