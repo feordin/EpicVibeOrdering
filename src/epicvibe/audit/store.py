@@ -1,5 +1,6 @@
 import json
 import sqlite3
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -24,28 +25,33 @@ class AuditStore:
         self._conn = sqlite3.connect(str(path), check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._conn.executescript(_SCHEMA)
+        self._lock = threading.Lock()
 
     def record_proposal(self, encounter_key: str, vp: ValidatedProposal, model: str) -> int:
-        cur = self._conn.execute(
-            "INSERT INTO proposals (encounter_key, created_at, model, proposal_json, violations_json)"
-            " VALUES (?, ?, ?, ?, ?)",
-            (encounter_key, _now(), model, vp.proposal.model_dump_json(),
-             json.dumps([v.model_dump() for v in vp.violations])))
-        self._conn.commit()
-        return cur.lastrowid
+        with self._lock:
+            cur = self._conn.execute(
+                "INSERT INTO proposals (encounter_key, created_at, model, proposal_json, violations_json)"
+                " VALUES (?, ?, ?, ?, ?)",
+                (encounter_key, _now(), model, vp.proposal.model_dump_json(),
+                 json.dumps([v.model_dump() for v in vp.violations])))
+            self._conn.commit()
+            return cur.lastrowid
 
     def record_feedback(self, service_id: str, payload: dict) -> int:
-        items = payload.get("feedback", [])
-        for f in items:
-            self._conn.execute(
-                "INSERT INTO feedback (service_id, card_uuid, outcome, received_at, raw_json)"
-                " VALUES (?, ?, ?, ?, ?)",
-                (service_id, f.get("card"), f.get("outcome"), _now(), json.dumps(f)))
-        self._conn.commit()
-        return len(items)
+        with self._lock:
+            items = payload.get("feedback", [])
+            for f in items:
+                self._conn.execute(
+                    "INSERT INTO feedback (service_id, card_uuid, outcome, received_at, raw_json)"
+                    " VALUES (?, ?, ?, ?, ?)",
+                    (service_id, f.get("card"), f.get("outcome"), _now(), json.dumps(f)))
+            self._conn.commit()
+            return len(items)
 
     def proposals(self) -> list[dict]:
-        return [dict(r) for r in self._conn.execute("SELECT * FROM proposals")]
+        with self._lock:
+            return [dict(r) for r in self._conn.execute("SELECT * FROM proposals")]
 
     def feedback(self) -> list[dict]:
-        return [dict(r) for r in self._conn.execute("SELECT * FROM feedback")]
+        with self._lock:
+            return [dict(r) for r in self._conn.execute("SELECT * FROM feedback")]
