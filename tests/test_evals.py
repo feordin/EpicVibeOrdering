@@ -1,3 +1,5 @@
+import asyncio
+import sys
 from pathlib import Path
 from epicvibe.catalog.index import CatalogIndex
 from epicvibe.catalog.loader import load_catalog
@@ -33,3 +35,8 @@ def test_forbidden_hurts_precision():
 def test_ungrounded_flagged():
     s = score(_vp([_item("ITEM_FAKE", "V_FAKE")]), EXPECTED, "t")
     assert s.grounded is False
+
+def test_zero_scenarios_fails(tmp_path, monkeypatch):
+    from evals import run as run_mod
+    monkeypatch.setattr(sys, "argv", ["evals.run", "--scenarios", str(tmp_path)])
+    assert asyncio.run(run_mod.main()) == 1

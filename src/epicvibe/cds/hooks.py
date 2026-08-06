@@ -9,6 +9,7 @@ from epicvibe.proposal.patient_summary import summarize_prefetch
 
 log = logging.getLogger("epicvibe.cds")
 router = APIRouter(dependencies=[Depends(epic_auth)])
+discovery_router = APIRouter()
 
 PREFETCH = {
     "conditions": "Condition?patient={{context.patientId}}&clinical-status=active",
@@ -50,7 +51,7 @@ def _enqueue_generate(state, key: str, context: dict, prefetch: dict) -> None:
     state.runner.enqueue(key, job)
 
 
-@router.get("/cds-services")
+@discovery_router.get("/cds-services")
 async def discovery() -> dict:
     return {"services": SERVICES}
 

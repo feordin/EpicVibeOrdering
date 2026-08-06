@@ -102,7 +102,14 @@ not to fire CDS Hooks (Epic's public sandbox cannot do that — see §5).
 
 ## 4. Customer non-prod (the real milestone)
 
-This is the integration milestone from spec §11 stage 2. Checklist:
+This is the integration milestone from spec §11 stage 2.
+
+**Note:** the in-memory proposal cache and the job runner are per-process state — run a
+single uvicorn worker for Phase 1. Multi-worker (or multi-instance) deployment would
+split this state across processes and break the warm-up cache/job flow; it requires a
+shared cache (e.g. Redis) and is a Phase 2+ concern.
+
+Checklist:
 
 - [ ] Client ID registered with the customer's Epic instance (free registration via
       fhir.epic.com, scoped to their org).

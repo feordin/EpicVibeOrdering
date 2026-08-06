@@ -19,10 +19,15 @@ async def main() -> int:
     ap.add_argument("--catalog", type=Path, default=Path("fixtures/catalog/sample_catalog.json"))
     args = ap.parse_args()
 
+    scenario_paths = sorted(args.scenarios.glob("*.json"))
+    if not scenario_paths:
+        print(f"no scenarios found in {args.scenarios}")
+        return 1
+
     settings = Settings()
     engine = ProposalEngine(CatalogIndex(load_catalog(args.catalog)), make_provider(settings))
     scores = []
-    for path in sorted(args.scenarios.glob("*.json")):
+    for path in scenario_paths:
         sc = json.loads(path.read_text())
         summary = summarize_prefetch(sc["context"], sc["prefetch"])
         vp = await engine.generate(summary)

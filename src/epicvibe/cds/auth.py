@@ -5,14 +5,18 @@ from fastapi import HTTPException, Request
 
 log = logging.getLogger("epicvibe.cds")
 
+_jwks_clients: dict[str, jwt.PyJWKClient] = {}
+
 
 def _signing_key(token: str, jwks_url: str):
-    return jwt.PyJWKClient(jwks_url).get_signing_key_from_jwt(token).key
+    client = _jwks_clients.setdefault(jwks_url, jwt.PyJWKClient(jwks_url))
+    return client.get_signing_key_from_jwt(token).key
 
 
 def verify_epic_jwt(token: str, jwks_url: str, audience: str) -> dict:
     key = _signing_key(token, jwks_url)
-    return jwt.decode(token, key, algorithms=["RS256", "RS384", "ES256"], audience=audience)
+    return jwt.decode(token, key, algorithms=["RS256", "RS384", "ES256"], audience=audience,
+                       options={"require": ["exp"]})
 
 
 async def epic_auth(request: Request) -> None:
