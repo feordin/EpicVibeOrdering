@@ -39,3 +39,9 @@ def test_schema_garbage():
     vp = validate_proposal({"nope": 1}, IDX)
     assert vp.violations[0].kind == "schema" and vp.is_empty
     assert vp.proposal.confidence == "low"
+
+def test_grounding_emptied_proposal_forces_low_confidence():
+    raw = {"order_sets": [{"order_set_id": "NOPE", "rationale": "r", "items": [_item()]}],
+           "confidence": "high"}
+    vp = validate_proposal(raw, IDX)
+    assert vp.is_empty and vp.proposal.confidence == "low"

@@ -62,6 +62,9 @@ def validate_proposal(raw: dict, index: CatalogIndex) -> ValidatedProposal:
                                           rationale=osp.rationale, items=kept_items))
     for v in violations:
         log.warning("grounding violation [%s]: %s", v.kind, v.detail)
+    # Force confidence to "low" if grounding validation emptied the proposal
+    is_empty = not any(i.include for o in kept_sets for i in o.items)
+    confidence = "low" if is_empty else proposal.confidence
     return ValidatedProposal(
-        proposal=Proposal(order_sets=kept_sets, confidence=proposal.confidence),
+        proposal=Proposal(order_sets=kept_sets, confidence=confidence),
         violations=violations)
