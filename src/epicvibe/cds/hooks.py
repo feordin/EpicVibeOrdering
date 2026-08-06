@@ -1,13 +1,14 @@
 import logging
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 
+from epicvibe.cds.auth import epic_auth
 from epicvibe.cds.cards import (render_missing_items_card, render_suggestion_cards,
                                 render_summary_card)
 from epicvibe.proposal.patient_summary import summarize_prefetch
 
 log = logging.getLogger("epicvibe.cds")
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(epic_auth)])
 
 PREFETCH = {
     "conditions": "Condition?patient={{context.patientId}}&clinical-status=active",
