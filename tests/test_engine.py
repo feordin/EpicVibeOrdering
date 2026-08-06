@@ -21,6 +21,8 @@ async def test_generates_validated_proposal():
     assert not vp.is_empty and vp.violations == []
     assert "AMB_DM2_NEWDX" in provider.calls[0]["user"]      # shortlist in prompt
     assert "AMB_HTN" not in provider.calls[0]["user"]        # non-matching set excluded
+    assert "PAT1" not in provider.calls[0]["user"]           # patient_id excluded from prompt
+    assert "ENC1" not in provider.calls[0]["user"]           # encounter_id excluded from prompt
 
 async def test_no_shortlist_skips_llm():
     provider = FakeProvider(GOOD)
