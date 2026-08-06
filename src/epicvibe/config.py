@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="EPICVIBE_", env_file=".env")
 
     catalog_path: Path = Path("fixtures/catalog/sample_catalog.json")
-    inference_provider: Literal["fake", "anthropic"] = "fake"
+    inference_provider: Literal["fake", "demo", "anthropic"] = "fake"
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-haiku-4-5-20251001"
     anthropic_base_url: str = "https://api.anthropic.com"

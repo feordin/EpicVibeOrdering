@@ -29,11 +29,24 @@ def cache_key(context: dict) -> str:
     return context.get("encounterId") or f"pat:{context['patientId']}"
 
 
+def _contained_medication_concept(res: dict) -> dict:
+    """Resolve medicationReference -> contained[] Medication (Epic Feb-2024+ style)."""
+    ref = (res.get("medicationReference") or {}).get("reference", "")
+    if not ref.startswith("#"):
+        return {}
+    contained_id = ref[1:]
+    for contained in res.get("contained", []):
+        if contained.get("resourceType") == "Medication" and contained.get("id") == contained_id:
+            return contained.get("code") or {}
+    return {}
+
+
 def _draft_codes(context: dict) -> frozenset[str]:
     codes = set()
     for entry in (context.get("draftOrders") or {}).get("entry", []):
         res = entry.get("resource", {})
-        concept = res.get("medicationCodeableConcept") or res.get("code") or {}
+        concept = (res.get("medicationCodeableConcept") or res.get("code")
+                  or _contained_medication_concept(res) or {})
         for coding in concept.get("coding", []):
             if coding.get("code"):
                 codes.add(coding["code"])
