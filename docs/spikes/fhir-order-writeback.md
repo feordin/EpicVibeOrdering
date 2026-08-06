@@ -69,6 +69,36 @@ user/Patient.read user/Procedure.read user/ServiceRequest.read offline_access`
 3. Residual (low-probability) question for the customer's Epic TS: any site-specific
    order-write mechanism in their contract beyond the public surface.
 
+## Addendum (2026-08-06): Why the Create APIs Exist — Mystery Solved
+
+Epic's own machine-readable spec records (fhir.epic.com/Specifications/Api?id=1060/1062)
+show the CDS Hooks Create (Unsigned Order) APIs have **no HTTP method and no URL
+template — they are not REST endpoints at all.** Their documented "sample response" is
+a CDS Hooks card JSON. Selecting them on an app registration (a) authorizes that CDS
+service's suggestions to create unsigned orders when accepted, and (b) gates whether
+Epic sends `draftOrders` context to the service. "Invoking" the API IS returning the
+resource inside a suggestion action; Epic files the order internally from its own
+master-file defaults. The hook's `fhirAuthorization` token even carries create-named
+scopes, but there is nothing to POST to — only the companion Read (Unsigned Order)
+endpoints are real REST (for reading draft orders during the hook window). The
+Feb-2024 `ServiceRequest.Update (Unsigned Order)` systemAction is likewise
+response-embedded and annotation-only (Da Vinci CRD pattern).
+
+**Backend Systems audience would not help:** the only public primary evidence (Josh
+Mandel's chat.fhir.org walkthrough, with Epic staff participating) shows backend
+sandbox tokens receive read-only scopes; Epic steers backend write use cases to HL7v2.
+`ServiceRequest.Create (External Radiotherapy Summary)` is a CodeX radiotherapy
+documentation intake for oncology systems (Varian/Elekta-class), not CPOE ordering.
+
+**Consumption path for the write capability = exactly our Phase 1 CDS service.** The
+remaining ways to see acceptance behavior without a customer environment: Epic's
+simulator supports patient-view only; Vendor Services membership (~$1,700/yr) includes
+the expanded test sandbox/harness where suggestion acceptance can be exercised.
+
+Key sources: fhir.epic.com/Specifications?api=1060, ?api=1062, ?api=10643,
+Documentation?docId=cds-hooks; chat-archive.fhir.org (Epic backend services; CDS Hook
+Simulator threads); open.epic.com/Interface/FHIR; healthapiguy.substack.com.
+
 ## Original Step Checklist (superseded by the above)
 
 - [ ] Obtain an access token for the registered sandbox app (needs Client ID —
