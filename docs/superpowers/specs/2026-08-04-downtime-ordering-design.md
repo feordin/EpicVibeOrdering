@@ -40,19 +40,33 @@ depth.
 - **Audit store** — same provenance discipline: who ordered what, when, AI involvement,
   edits.
 
-## 4. Write-Back (decided)
+## 4. Write-Back (decided, pending spike result)
 
-FHIR cannot write orders into Epic outside CDS Hooks (verified; confirm site-specifics
-with customer TS once). CDS-card staging is rejected for downtime backlogs (long lists
-don't fit card UX). Therefore:
+Public documentation indicates FHIR cannot write orders into Epic outside CDS Hooks
+(only CDS-Hooks-scoped unsigned-order creates are listed on open.epic). We do NOT take
+this on faith: **a spike verifies it empirically before any Phase 2 build.** CDS-card
+staging is rejected for downtime backlogs only (long lists don't fit card UX); CDS
+suggestion cards remain the core write mechanism of the live AI-assisted workflow
+(core spec) — unaffected by this section.
 
-1. **Primary: HL7v2 ORM via Epic Bridges** — per-site interface, customer Epic team
-   builds their side; we export captured orders as ORM^O01 filed per their build
-   (e.g., pended for cosign). Long-lead item: start the interface conversation with
-   the customer early.
-2. **Fallback (day one): recovery worklist** — per-patient structured list of captured
-   orders (screen + print/export) for assisted manual entry.
-3. **Optional: documentation note** — `DocumentReference.Create` (supported by Epic
+**Spike (runs early, during Phase 1):** register a free app on fhir.epic.com; inspect
+the client-ID API picker for any standalone `ServiceRequest.Create` /
+`MedicationRequest.Create` (the picker is the source of truth for what is invocable);
+attempt order creates against the sandbox; ask the customer's Epic TS whether any
+site-specific FHIR order write exists for their contract. Record findings in
+`docs/spikes/fhir-order-writeback.md`.
+
+Channel priority:
+
+1. **FHIR order create — primary if the spike proves it possible.** Batch write of
+   captured orders once Epic recovers (filed unsigned/pended per what the API allows).
+2. **HL7v2 ORM via Epic Bridges — if FHIR write is not possible.** Per-site interface,
+   customer Epic team builds their side; we export captured orders as ORM^O01 filed
+   per their build (e.g., pended for cosign). Long-lead item: start the interface
+   conversation with the customer early if the spike fails.
+3. **Fallback (day one, always built): recovery worklist** — per-patient structured
+   list of captured orders (screen + print/export) for assisted manual entry.
+4. **Optional: documentation note** — `DocumentReference.Create` (supported by Epic
    over FHIR) filing a downtime-orders summary note to the chart.
 
 Reconciliation: captured orders carry manually-entered patient identifiers; at
@@ -99,7 +113,8 @@ service (core spec) is simply idle while Epic is down.
 
 ## 9. Sequencing
 
-Phase 1 (current plan) builds the shared core + CDS Hooks service. Phase 2 implements
-this spec once Open Questions 1–3 have customer answers; an implementation plan is
+Phase 1 (current plan) builds the shared core + CDS Hooks service, and runs the FHIR
+write-back spike (§4) alongside it. Phase 2 implements this spec once Open Questions
+1–3 have customer answers and the spike result is recorded; an implementation plan is
 written then. The only Phase-1 change made for Phase 2: none required — the catalog and
 engine are already shared modules.
