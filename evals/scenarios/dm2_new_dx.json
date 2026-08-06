@@ -1,0 +1,20 @@
+{
+  "name": "dm2_new_dx",
+  "context": {"userId": "Practitioner/PRACT1", "patientId": "PAT1", "encounterId": "ENC1"},
+  "prefetch": {
+    "conditions": {"resourceType": "Bundle", "type": "searchset", "entry": [
+      {"resource": {"resourceType": "Condition", "id": "c1",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E11.9",
+                             "display": "Type 2 diabetes mellitus without complications"}]},
+        "subject": {"reference": "Patient/PAT1"}}}]},
+    "medications": {"resourceType": "Bundle", "type": "searchset", "entry": [
+      {"resource": {"resourceType": "MedicationRequest", "id": "m1", "status": "active", "intent": "order",
+        "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                                                  "code": "310965", "display": "lisinopril 10 MG Oral Tablet"}]},
+        "subject": {"reference": "Patient/PAT1"}}}]}
+  },
+  "expected": {"order_set_id": "AMB_DM2_NEWDX",
+               "required_items": ["ITEM_A1C", "ITEM_LIPID", "ITEM_UMALB", "ITEM_METFORMIN"],
+               "forbidden_items": []}
+}
