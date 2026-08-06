@@ -56,18 +56,22 @@ attempt order creates against the sandbox; ask the customer's Epic TS whether an
 site-specific FHIR order write exists for their contract. Record findings in
 `docs/spikes/fhir-order-writeback.md`.
 
-Channel priority:
+**Spike result (2026-08-06, see `docs/spikes/fhir-order-writeback.md`): FHIR order
+write-back is NOT viable.** Authenticated sandbox attempts returned 403 for
+ServiceRequest.Create (context-bound to CDS Hooks / niche radiotherapy API) and 405
+for MedicationRequest.Create (no such operation). Channel priority is settled:
 
-1. **FHIR order create — primary if the spike proves it possible.** Batch write of
-   captured orders once Epic recovers (filed unsigned/pended per what the API allows).
-2. **HL7v2 ORM via Epic Bridges — if FHIR write is not possible.** Per-site interface,
-   customer Epic team builds their side; we export captured orders as ORM^O01 filed
-   per their build (e.g., pended for cosign). Long-lead item: start the interface
-   conversation with the customer early if the spike fails.
-3. **Fallback (day one, always built): recovery worklist** — per-patient structured
+1. **Primary: HL7v2 ORM via Epic Bridges** — per-site interface, customer Epic team
+   builds their side; we export captured orders as ORM^O01 filed per their build
+   (e.g., pended for cosign). Long-lead item: start the interface conversation with
+   the customer now.
+2. **Fallback (day one, always built): recovery worklist** — per-patient structured
    list of captured orders (screen + print/export) for assisted manual entry.
-4. **Optional: documentation note** — `DocumentReference.Create` (supported by Epic
-   over FHIR) filing a downtime-orders summary note to the chart.
+3. **Optional: documentation note** — `DocumentReference.Create` (supported by Epic
+   over FHIR) filing a downtime-orders summary note to the chart; add that API to the
+   app registration when built.
+4. Residual TS question (low probability): any site-specific order-write mechanism in
+   the customer's contract beyond the public surface.
 
 Reconciliation: captured orders carry manually-entered patient identifiers; at
 recovery, a reconciliation step matches them to real Epic patients (search via FHIR

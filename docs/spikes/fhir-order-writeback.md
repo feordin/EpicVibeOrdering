@@ -1,6 +1,6 @@
 # Spike: FHIR Order Write-Back Against Epic Sandbox
 
-**Status:** In progress (2026-08-05)
+**Status:** COMPLETE (2026-08-06) — **FHIR order write-back is not viable; HL7v2 becomes the primary downtime channel.**
 **Question:** Can orders be written into Epic over plain FHIR (outside a CDS Hooks
 interaction)? Determines the downtime write-back channel priority (spec
 `2026-08-04-downtime-ordering-design.md` §4).
@@ -33,7 +33,43 @@ order write-back over plain FHIR is ruled out at this sandbox's surface, full st
 **401, `WWW-Authenticate: Bearer`**, empty body. The route exists and is gated on
 auth only (a nonexistent operation typically yields 404/405 or an OperationOutcome).
 
-## Remaining Steps
+## Authenticated Attempt (2026-08-06) — DEFINITIVE
+
+App: fhir.epic.com registration, audience "Clinicians or Administrative Users",
+confidential client (non-prod client ID 7d3f043c-e73e-472d-a196-91e6226179ee),
+order-related APIs selected including both CDS Hooks (Unsigned Order) creates and
+`ServiceRequest.Create (External Radiotherapy Summary)`.
+
+Flow: SMART standalone authorization-code (Playwright-captured redirect; sandbox
+provider login FHIR/EpicFhir11!) → token exchange with client secret → 200.
+
+**Scopes Epic granted to the user-context token (read-only, despite create APIs
+being selected on the app):**
+`user/MedicationDispense.read user/MedicationRequest.read user/NutritionOrder.read
+user/Patient.read user/Procedure.read user/ServiceRequest.read offline_access`
+
+| Attempt | Result | Meaning |
+|---|---|---|
+| `GET Patient/{id}` | 200 | Token valid, reads work |
+| `POST ServiceRequest` (status draft) | **403**, empty body | Operation exists but is not authorized for a standard user token — the create APIs are context-bound (CDS Hooks / niche radiotherapy), not grantable to a general SMART session |
+| `POST ServiceRequest` (status active) | **403** | Same |
+| `POST MedicationRequest` | **405** "resource does not support http method 'POST'" | No medication order create exists at all, in any context |
+
+### Conclusion
+
+1. **General-purpose FHIR order write-back into Epic is not possible** on the public
+   sandbox surface — empirically confirmed, not just documentation-inferred.
+   ServiceRequest creates exist only inside a CDS Hooks interaction (unsigned orders)
+   or the niche External Radiotherapy Summary API; MedicationRequest has no create,
+   full stop.
+2. **Downtime write-back channel priority is now settled:** HL7v2 ORM via Bridges is
+   primary (all order types), recovery worklist is the day-one fallback,
+   `DocumentReference.Create` for the chart documentation note (add that API to the
+   app registration when needed).
+3. Residual (low-probability) question for the customer's Epic TS: any site-specific
+   order-write mechanism in their contract beyond the public surface.
+
+## Original Step Checklist (superseded by the above)
 
 - [ ] Obtain an access token for the registered sandbox app (needs Client ID —
       requested from app owner; flow depends on app type: backend client_credentials
