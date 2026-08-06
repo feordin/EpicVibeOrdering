@@ -1,0 +1,44 @@
+{
+  "meta": {"epic_version": "Feb 2026", "extracted_at": "2026-08-01T00:00:00Z", "site_id": "CUSTOMER1"},
+  "order_sets": [
+    {
+      "order_set_id": "AMB_DM2_NEWDX",
+      "name": "Diabetes Mellitus Type 2 - New Diagnosis (Ambulatory)",
+      "keywords": ["diabetes", "a1c", "metformin", "glucose"],
+      "icd10_codes": ["E11"],
+      "groups": [
+        {"group_id": "G_LABS", "name": "Laboratory", "items": [
+          {"item_id": "ITEM_A1C", "name": "Hemoglobin A1c", "order_type": "procedure", "default_selected": true,
+           "variants": [{"variant_id": "V_A1C", "code": "PREF_A1C", "display": "Hemoglobin A1c", "defaults": {"priority": "Routine"}}]},
+          {"item_id": "ITEM_LIPID", "name": "Lipid Panel", "order_type": "procedure", "default_selected": true,
+           "variants": [{"variant_id": "V_LIPID", "code": "PREF_LIPID", "display": "Lipid Panel", "defaults": {"priority": "Routine"}}]},
+          {"item_id": "ITEM_UMALB", "name": "Urine Microalbumin/Creatinine Ratio", "order_type": "procedure", "default_selected": true,
+           "variants": [{"variant_id": "V_UMALB", "code": "PREF_UMALB", "display": "Urine Microalbumin/Creatinine Ratio", "defaults": {"priority": "Routine"}}]}
+        ]},
+        {"group_id": "G_MEDS", "name": "Medications", "items": [
+          {"item_id": "ITEM_METFORMIN", "name": "Metformin", "order_type": "medication", "default_selected": true,
+           "variants": [
+             {"variant_id": "V_MET_500", "code": "PREF_MET_500", "display": "metFORMIN 500 mg tablet BID", "defaults": {"dose": "500 mg", "route": "oral", "frequency": "BID"}},
+             {"variant_id": "V_MET_1000", "code": "PREF_MET_1000", "display": "metFORMIN 1000 mg tablet BID", "defaults": {"dose": "1000 mg", "route": "oral", "frequency": "BID"}}
+           ]}
+        ]},
+        {"group_id": "G_REF", "name": "Referrals", "items": [
+          {"item_id": "ITEM_RETINAL", "name": "Ophthalmology Referral - Diabetic Retinal Exam", "order_type": "procedure", "default_selected": false,
+           "variants": [{"variant_id": "V_RETINAL", "code": "PREF_RETINAL", "display": "Referral to Ophthalmology", "defaults": {}}]}
+        ]}
+      ]
+    },
+    {
+      "order_set_id": "AMB_HTN",
+      "name": "Hypertension Management (Ambulatory)",
+      "keywords": ["hypertension", "blood pressure"],
+      "icd10_codes": ["I10"],
+      "groups": [
+        {"group_id": "G_LABS", "name": "Laboratory", "items": [
+          {"item_id": "ITEM_BMP", "name": "Basic Metabolic Panel", "order_type": "procedure", "default_selected": true,
+           "variants": [{"variant_id": "V_BMP", "code": "PREF_BMP", "display": "Basic Metabolic Panel", "defaults": {"priority": "Routine"}}]}
+        ]}
+      ]
+    }
+  ]
+}
