@@ -1,0 +1,150 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-santos",
+  "type": "collection",
+  "entry": [
+    {"resource": {
+      "resourceType": "Patient", "id": "pat-santos",
+      "identifier": [{"use": "usual", "type": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v2-0203", "code": "MR", "display": "Medical Record Number"}]}, "system": "urn:oid:2.16.840.1.113883.19.5", "value": "MRN-100234"}],
+      "active": true,
+      "name": [{"use": "official", "family": "Santos", "given": ["Maria", "Elena"]}],
+      "telecom": [{"system": "phone", "value": "555-0142", "use": "home"}],
+      "gender": "female", "birthDate": "1973-04-18",
+      "address": [{"use": "home", "line": ["418 Willow Creek Rd"], "city": "Springfield", "state": "IL", "postalCode": "62704", "country": "US"}],
+      "maritalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus", "code": "M", "display": "Married"}]},
+      "generalPractitioner": [{"reference": "Practitioner/pr-1", "display": "Dr. Alan Reyes"}]
+    }},
+    {"resource": {
+      "resourceType": "Encounter", "id": "enc-santos-1", "status": "in-progress",
+      "class": {"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "AMB", "display": "ambulatory"},
+      "type": [{"coding": [{"system": "http://snomed.info/sct", "code": "185349003", "display": "Encounter for check up"}], "text": "Office Visit"}],
+      "subject": {"reference": "Patient/pat-santos", "display": "Maria Santos"},
+      "participant": [{"individual": {"reference": "Practitioner/pr-1", "display": "Dr. Alan Reyes"}}],
+      "period": {"start": "2026-09-12T09:05:00Z"},
+      "reasonCode": [{"text": "Follow-up, elevated glucose"}]
+    }},
+    {"resource": {
+      "resourceType": "Condition", "id": "cond-santos-dm2",
+      "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active", "display": "Active"}]},
+      "verificationStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed"}]},
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item", "display": "Problem List Item"}]}],
+      "code": {"coding": [
+        {"system": "http://snomed.info/sct", "code": "44054006", "display": "Type 2 diabetes mellitus"},
+        {"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E11.9", "display": "Type 2 diabetes mellitus without complications"}],
+        "text": "Type 2 diabetes mellitus, new diagnosis"},
+      "subject": {"reference": "Patient/pat-santos"},
+      "encounter": {"reference": "Encounter/enc-santos-1"},
+      "onsetDateTime": "2026-09-12", "recordedDate": "2026-09-12"
+    }},
+    {"resource": {
+      "resourceType": "Condition", "id": "cond-santos-htn",
+      "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active", "display": "Active"}]},
+      "verificationStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed"}]},
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item"}]}],
+      "code": {"coding": [
+        {"system": "http://snomed.info/sct", "code": "59621000", "display": "Essential hypertension"},
+        {"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I10", "display": "Essential (primary) hypertension"}],
+        "text": "Essential hypertension"},
+      "subject": {"reference": "Patient/pat-santos"},
+      "onsetDateTime": "2021-03-02", "recordedDate": "2021-03-02"
+    }},
+    {"resource": {
+      "resourceType": "Condition", "id": "cond-santos-obesity",
+      "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active", "display": "Active"}]},
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item"}]}],
+      "code": {"coding": [
+        {"system": "http://snomed.info/sct", "code": "414916001", "display": "Obesity"},
+        {"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E66.9", "display": "Obesity, unspecified"}],
+        "text": "Obesity (BMI 31.2)"},
+      "subject": {"reference": "Patient/pat-santos"},
+      "onsetDateTime": "2019-06-11", "recordedDate": "2019-06-11"
+    }},
+    {"resource": {
+      "resourceType": "MedicationRequest", "id": "medreq-santos-lisinopril", "status": "active", "intent": "order",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category", "code": "outpatient"}]}],
+      "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "314076", "display": "lisinopril 10 MG Oral Tablet"}], "text": "lisinopril 10 mg tablet"},
+      "subject": {"reference": "Patient/pat-santos"},
+      "authoredOn": "2025-11-04",
+      "requester": {"reference": "Practitioner/pr-1", "display": "Dr. Alan Reyes"},
+      "dosageInstruction": [{"text": "Take 1 tablet (10 mg) by mouth daily", "timing": {"repeat": {"frequency": 1, "period": 1, "periodUnit": "d"}}, "route": {"coding": [{"system": "http://snomed.info/sct", "code": "26643006", "display": "Oral route"}]}}]
+    }},
+    {"resource": {
+      "resourceType": "MedicationRequest", "id": "medreq-santos-atorva", "status": "active", "intent": "order",
+      "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "617312", "display": "atorvastatin 20 MG Oral Tablet"}], "text": "atorvastatin 20 mg tablet"},
+      "subject": {"reference": "Patient/pat-santos"},
+      "authoredOn": "2025-11-04",
+      "requester": {"reference": "Practitioner/pr-1"},
+      "dosageInstruction": [{"text": "Take 1 tablet (20 mg) by mouth at bedtime"}]
+    }},
+    {"resource": {
+      "resourceType": "AllergyIntolerance", "id": "alg-santos-pcn",
+      "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "code": "active", "display": "Active"}]},
+      "verificationStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification", "code": "confirmed"}]},
+      "type": "allergy", "category": ["medication"], "criticality": "high",
+      "code": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "7980", "display": "Penicillin G"}, {"system": "http://snomed.info/sct", "code": "373270004", "display": "Penicillin class of antibiotic"}], "text": "Penicillins"},
+      "patient": {"reference": "Patient/pat-santos"},
+      "recordedDate": "2014-08-22",
+      "reaction": [{"manifestation": [{"coding": [{"system": "http://snomed.info/sct", "code": "247472004", "display": "Hives"}], "text": "Hives"}], "severity": "moderate"}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-santos-a1c", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory", "display": "Laboratory"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c/Hemoglobin.total in Blood"}], "text": "Hemoglobin A1c"},
+      "subject": {"reference": "Patient/pat-santos"}, "effectiveDateTime": "2026-09-10T14:20:00Z",
+      "valueQuantity": {"value": 8.4, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%"},
+      "interpretation": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High"}]}],
+      "referenceRange": [{"low": {"value": 4.0, "unit": "%"}, "high": {"value": 5.6, "unit": "%"}}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-santos-glucose", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "2345-7", "display": "Glucose [Mass/volume] in Serum or Plasma"}], "text": "Glucose"},
+      "subject": {"reference": "Patient/pat-santos"}, "effectiveDateTime": "2026-09-10T14:20:00Z",
+      "valueQuantity": {"value": 172, "unit": "mg/dL", "system": "http://unitsofmeasure.org", "code": "mg/dL"},
+      "interpretation": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H"}]}],
+      "referenceRange": [{"low": {"value": 70, "unit": "mg/dL"}, "high": {"value": 99, "unit": "mg/dL"}}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-santos-creat", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "2160-0", "display": "Creatinine [Mass/volume] in Serum or Plasma"}], "text": "Creatinine"},
+      "subject": {"reference": "Patient/pat-santos"}, "effectiveDateTime": "2026-09-10T14:20:00Z",
+      "valueQuantity": {"value": 0.9, "unit": "mg/dL", "code": "mg/dL"},
+      "referenceRange": [{"low": {"value": 0.6, "unit": "mg/dL"}, "high": {"value": 1.1, "unit": "mg/dL"}}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-santos-potassium", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "2823-3", "display": "Potassium [Moles/volume] in Serum or Plasma"}], "text": "Potassium"},
+      "subject": {"reference": "Patient/pat-santos"}, "effectiveDateTime": "2026-09-10T14:20:00Z",
+      "valueQuantity": {"value": 4.2, "unit": "mmol/L", "code": "mmol/L"},
+      "referenceRange": [{"low": {"value": 3.5, "unit": "mmol/L"}, "high": {"value": 5.1, "unit": "mmol/L"}}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-santos-ldl", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "13457-7", "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma by calculation"}], "text": "LDL Cholesterol"},
+      "subject": {"reference": "Patient/pat-santos"}, "effectiveDateTime": "2025-11-02T13:00:00Z",
+      "valueQuantity": {"value": 138, "unit": "mg/dL", "code": "mg/dL"},
+      "interpretation": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H"}]}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-santos-bmi", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs", "display": "Vital Signs"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "39156-5", "display": "Body mass index (BMI) [Ratio]"}], "text": "BMI"},
+      "subject": {"reference": "Patient/pat-santos"}, "encounter": {"reference": "Encounter/enc-santos-1"},
+      "effectiveDateTime": "2026-09-12T09:12:00Z",
+      "valueQuantity": {"value": 31.2, "unit": "kg/m2", "code": "kg/m2"}
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-santos-bp", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "85354-9", "display": "Blood pressure panel with all children optional"}], "text": "Blood pressure"},
+      "subject": {"reference": "Patient/pat-santos"}, "encounter": {"reference": "Encounter/enc-santos-1"},
+      "effectiveDateTime": "2026-09-12T09:12:00Z",
+      "component": [
+        {"code": {"coding": [{"system": "http://loinc.org", "code": "8480-6", "display": "Systolic blood pressure"}]}, "valueQuantity": {"value": 148, "unit": "mm[Hg]", "code": "mm[Hg]"}},
+        {"code": {"coding": [{"system": "http://loinc.org", "code": "8462-4", "display": "Diastolic blood pressure"}]}, "valueQuantity": {"value": 88, "unit": "mm[Hg]", "code": "mm[Hg]"}}]
+    }}
+  ]
+}

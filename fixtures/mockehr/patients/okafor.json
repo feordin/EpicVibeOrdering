@@ -1,0 +1,174 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-okafor",
+  "type": "collection",
+  "entry": [
+    {"resource": {
+      "resourceType": "Patient", "id": "pat-okafor",
+      "identifier": [{"use": "usual", "type": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v2-0203", "code": "MR", "display": "Medical Record Number"}]}, "system": "urn:oid:2.16.840.1.113883.19.5", "value": "MRN-100477"}],
+      "active": true,
+      "name": [{"use": "official", "family": "Okafor", "given": ["James", "A"]}],
+      "telecom": [{"system": "phone", "value": "555-0198", "use": "mobile"}],
+      "gender": "male", "birthDate": "1958-11-30",
+      "address": [{"use": "home", "line": ["27 Hollis Ave Apt 4B"], "city": "Springfield", "state": "IL", "postalCode": "62702", "country": "US"}],
+      "maritalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus", "code": "W", "display": "Widowed"}]},
+      "generalPractitioner": [{"reference": "Practitioner/pr-1", "display": "Dr. Alan Reyes"}]
+    }},
+    {"resource": {
+      "resourceType": "Encounter", "id": "enc-okafor-1", "status": "in-progress",
+      "class": {"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "AMB", "display": "ambulatory"},
+      "type": [{"coding": [{"system": "http://snomed.info/sct", "code": "185345009", "display": "Encounter for symptom"}], "text": "Acute Visit"}],
+      "subject": {"reference": "Patient/pat-okafor", "display": "James Okafor"},
+      "participant": [{"individual": {"reference": "Practitioner/pr-1", "display": "Dr. Alan Reyes"}}],
+      "period": {"start": "2026-09-12T08:40:00Z"},
+      "reasonCode": [{"text": "Cough, fever, shortness of breath"}]
+    }},
+    {"resource": {
+      "resourceType": "Condition", "id": "cond-okafor-cap",
+      "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active", "display": "Active"}]},
+      "verificationStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed"}]},
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "encounter-diagnosis", "display": "Encounter Diagnosis"}]}],
+      "code": {"coding": [
+        {"system": "http://snomed.info/sct", "code": "385093006", "display": "Community acquired pneumonia"},
+        {"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "J18.9", "display": "Pneumonia, unspecified organism"}],
+        "text": "Community-acquired pneumonia"},
+      "subject": {"reference": "Patient/pat-okafor"},
+      "encounter": {"reference": "Encounter/enc-okafor-1"},
+      "onsetDateTime": "2026-09-12", "recordedDate": "2026-09-12"
+    }},
+    {"resource": {
+      "resourceType": "Condition", "id": "cond-okafor-copd",
+      "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active", "display": "Active"}]},
+      "verificationStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed"}]},
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item"}]}],
+      "code": {"coding": [
+        {"system": "http://snomed.info/sct", "code": "13645005", "display": "Chronic obstructive lung disease"},
+        {"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "J44.9", "display": "Chronic obstructive pulmonary disease, unspecified"}],
+        "text": "COPD, GOLD stage II"},
+      "subject": {"reference": "Patient/pat-okafor"},
+      "onsetDateTime": "2018-02-14", "recordedDate": "2018-02-14"
+    }},
+    {"resource": {
+      "resourceType": "Condition", "id": "cond-okafor-ckd3",
+      "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active", "display": "Active"}]},
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item"}]}],
+      "code": {"coding": [
+        {"system": "http://snomed.info/sct", "code": "433144002", "display": "Chronic kidney disease stage 3"},
+        {"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "N18.30", "display": "Chronic kidney disease, stage 3 unspecified"}],
+        "text": "Chronic kidney disease stage 3 (eGFR 48)"},
+      "subject": {"reference": "Patient/pat-okafor"},
+      "onsetDateTime": "2022-09-01", "recordedDate": "2022-09-01"
+    }},
+    {"resource": {
+      "resourceType": "MedicationRequest", "id": "medreq-okafor-tiotropium", "status": "active", "intent": "order",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category", "code": "outpatient"}]}],
+      "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "810126", "display": "tiotropium bromide 0.018 MG Inhalation Powder"}], "text": "tiotropium 18 mcg inhalation capsule"},
+      "subject": {"reference": "Patient/pat-okafor"},
+      "authoredOn": "2026-03-19",
+      "requester": {"reference": "Practitioner/pr-1"},
+      "dosageInstruction": [{"text": "Inhale contents of 1 capsule daily via HandiHaler"}]
+    }},
+    {"resource": {
+      "resourceType": "MedicationRequest", "id": "medreq-okafor-albuterol", "status": "active", "intent": "order",
+      "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "745679", "display": "albuterol 0.09 MG/ACTUAT Metered Dose Inhaler"}], "text": "albuterol HFA inhaler"},
+      "subject": {"reference": "Patient/pat-okafor"},
+      "authoredOn": "2026-03-19",
+      "dosageInstruction": [{"text": "2 puffs inhaled every 4 hours as needed for shortness of breath"}]
+    }},
+    {"resource": {
+      "resourceType": "AllergyIntolerance", "id": "alg-okafor-sulfa",
+      "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "code": "active", "display": "Active"}]},
+      "verificationStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification", "code": "confirmed"}]},
+      "type": "allergy", "category": ["medication"], "criticality": "low",
+      "code": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "10180", "display": "Sulfamethoxazole"}, {"system": "http://snomed.info/sct", "code": "387406002", "display": "Sulfonamide"}], "text": "Sulfa drugs"},
+      "patient": {"reference": "Patient/pat-okafor"},
+      "recordedDate": "2010-05-05",
+      "reaction": [{"manifestation": [{"coding": [{"system": "http://snomed.info/sct", "code": "271807003", "display": "Rash"}], "text": "Rash"}], "severity": "mild"}]
+    }},
+    {"resource": {
+      "resourceType": "ServiceRequest", "id": "srv-okafor-cxr", "status": "completed", "intent": "order",
+      "category": [{"coding": [{"system": "http://snomed.info/sct", "code": "363679005", "display": "Imaging"}]}],
+      "code": {"coding": [
+        {"system": "http://loinc.org", "code": "36643-5", "display": "XR Chest PA and Lateral"},
+        {"system": "http://snomed.info/sct", "code": "399208008", "display": "Plain chest X-ray"}],
+        "text": "Chest X-ray, PA and lateral"},
+      "subject": {"reference": "Patient/pat-okafor"},
+      "encounter": {"reference": "Encounter/enc-okafor-1"},
+      "authoredOn": "2026-09-12T08:52:00Z",
+      "requester": {"reference": "Practitioner/pr-1", "display": "Dr. Alan Reyes"},
+      "reasonCode": [{"text": "Cough and fever, rule out pneumonia"}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-okafor-temp", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs", "display": "Vital Signs"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "8310-5", "display": "Body temperature"}], "text": "Temperature"},
+      "subject": {"reference": "Patient/pat-okafor"}, "encounter": {"reference": "Encounter/enc-okafor-1"},
+      "effectiveDateTime": "2026-09-12T08:46:00Z",
+      "valueQuantity": {"value": 38.6, "unit": "Cel", "system": "http://unitsofmeasure.org", "code": "Cel"},
+      "interpretation": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High"}]}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-okafor-spo2", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "2708-6", "display": "Oxygen saturation in Arterial blood"}], "text": "SpO2"},
+      "subject": {"reference": "Patient/pat-okafor"}, "encounter": {"reference": "Encounter/enc-okafor-1"},
+      "effectiveDateTime": "2026-09-12T08:46:00Z",
+      "valueQuantity": {"value": 92, "unit": "%", "code": "%"},
+      "interpretation": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "L", "display": "Low"}]}],
+      "referenceRange": [{"low": {"value": 94, "unit": "%"}, "high": {"value": 100, "unit": "%"}}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-okafor-hr", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "8867-4", "display": "Heart rate"}], "text": "Heart rate"},
+      "subject": {"reference": "Patient/pat-okafor"}, "encounter": {"reference": "Encounter/enc-okafor-1"},
+      "effectiveDateTime": "2026-09-12T08:46:00Z",
+      "valueQuantity": {"value": 104, "unit": "/min", "code": "/min"}
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-okafor-bp", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "85354-9", "display": "Blood pressure panel with all children optional"}], "text": "Blood pressure"},
+      "subject": {"reference": "Patient/pat-okafor"}, "encounter": {"reference": "Encounter/enc-okafor-1"},
+      "effectiveDateTime": "2026-09-12T08:46:00Z",
+      "component": [
+        {"code": {"coding": [{"system": "http://loinc.org", "code": "8480-6", "display": "Systolic blood pressure"}]}, "valueQuantity": {"value": 128, "unit": "mm[Hg]", "code": "mm[Hg]"}},
+        {"code": {"coding": [{"system": "http://loinc.org", "code": "8462-4", "display": "Diastolic blood pressure"}]}, "valueQuantity": {"value": 76, "unit": "mm[Hg]", "code": "mm[Hg]"}}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-okafor-wbc", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory", "display": "Laboratory"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "6690-2", "display": "Leukocytes [#/volume] in Blood by Automated count"}], "text": "WBC"},
+      "subject": {"reference": "Patient/pat-okafor"}, "effectiveDateTime": "2026-09-12T09:05:00Z",
+      "valueQuantity": {"value": 14.2, "unit": "10*3/uL", "code": "10*3/uL"},
+      "interpretation": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H"}]}],
+      "referenceRange": [{"low": {"value": 4.0, "unit": "10*3/uL"}, "high": {"value": 11.0, "unit": "10*3/uL"}}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-okafor-creat", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "2160-0", "display": "Creatinine [Mass/volume] in Serum or Plasma"}], "text": "Creatinine"},
+      "subject": {"reference": "Patient/pat-okafor"}, "effectiveDateTime": "2026-09-12T09:05:00Z",
+      "valueQuantity": {"value": 1.4, "unit": "mg/dL", "code": "mg/dL"},
+      "interpretation": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H"}]}],
+      "referenceRange": [{"low": {"value": 0.7, "unit": "mg/dL"}, "high": {"value": 1.3, "unit": "mg/dL"}}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-okafor-egfr", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "33914-3", "display": "Glomerular filtration rate/1.73 sq M.predicted"}], "text": "eGFR"},
+      "subject": {"reference": "Patient/pat-okafor"}, "effectiveDateTime": "2026-09-12T09:05:00Z",
+      "valueQuantity": {"value": 48, "unit": "mL/min/{1.73_m2}", "code": "mL/min/{1.73_m2}"},
+      "interpretation": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "L"}]}],
+      "referenceRange": [{"low": {"value": 60, "unit": "mL/min/{1.73_m2}"}}]
+    }},
+    {"resource": {
+      "resourceType": "Observation", "id": "obs-okafor-sodium", "status": "final",
+      "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+      "code": {"coding": [{"system": "http://loinc.org", "code": "2951-2", "display": "Sodium [Moles/volume] in Serum or Plasma"}], "text": "Sodium"},
+      "subject": {"reference": "Patient/pat-okafor"}, "effectiveDateTime": "2026-09-12T09:05:00Z",
+      "valueQuantity": {"value": 134, "unit": "mmol/L", "code": "mmol/L"},
+      "referenceRange": [{"low": {"value": 135, "unit": "mmol/L"}, "high": {"value": 145, "unit": "mmol/L"}}]
+    }}
+  ]
+}

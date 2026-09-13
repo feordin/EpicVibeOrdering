@@ -1,0 +1,19 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-practitioners",
+  "type": "collection",
+  "entry": [
+    {"resource": {
+      "resourceType": "Practitioner", "id": "pr-1", "active": true,
+      "identifier": [{"system": "http://hl7.org/fhir/sid/us-npi", "value": "9941003720"}],
+      "name": [{"use": "official", "family": "Reyes", "given": ["Alan"], "prefix": ["Dr."], "suffix": ["MD"]}],
+      "telecom": [{"system": "email", "value": "areyes@example.org", "use": "work"}],
+      "gender": "male"
+    }},
+    {"resource": {
+      "resourceType": "Organization", "id": "org-1", "active": true,
+      "name": "Springfield Family Medicine",
+      "telecom": [{"system": "phone", "value": "555-0100"}]
+    }}
+  ]
+}
