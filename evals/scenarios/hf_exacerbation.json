@@ -1,0 +1,45 @@
+{
+  "name": "hf_exacerbation",
+  "context": {"userId": "Practitioner/PRACT3", "patientId": "PAT3", "encounterId": "ENC3"},
+  "prefetch": {
+    "patient": {"resourceType": "Patient", "id": "PAT3", "gender": "female", "birthDate": "1952-06-18"},
+    "conditions": {"resourceType": "Bundle", "type": "searchset", "entry": [
+      {"resource": {"resourceType": "Condition", "id": "c1",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I50.22",
+                             "display": "Chronic systolic heart failure"}]},
+        "subject": {"reference": "Patient/PAT3"}}},
+      {"resource": {"resourceType": "Condition", "id": "c2",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I48.0",
+                             "display": "Paroxysmal atrial fibrillation"}]},
+        "subject": {"reference": "Patient/PAT3"}}}]},
+    "medications": {"resourceType": "Bundle", "type": "searchset", "entry": [
+      {"resource": {"resourceType": "MedicationRequest", "id": "m1", "status": "active", "intent": "order",
+        "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                                                  "code": "1364445", "display": "apixaban 5 MG Oral Tablet"}]},
+        "subject": {"reference": "Patient/PAT3"}}}]},
+    "observations": {"resourceType": "Bundle", "type": "searchset", "entry": [
+      {"resource": {"resourceType": "Observation", "id": "ob1", "status": "final",
+        "category": [{"coding": [{"code": "laboratory"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "30934-4", "display": "BNP"}]},
+        "effectiveDateTime": "2026-09-12T06:40:00Z",
+        "valueQuantity": {"value": 1450, "unit": "pg/mL"}}},
+      {"resource": {"resourceType": "Observation", "id": "ob2", "status": "final",
+        "category": [{"coding": [{"code": "laboratory"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "2823-3", "display": "Potassium"}]},
+        "effectiveDateTime": "2026-09-12T06:40:00Z",
+        "valueQuantity": {"value": 5.1, "unit": "mmol/L"}}}]},
+    "allergies": {"resourceType": "Bundle", "type": "searchset", "entry": []},
+    "encounter": {"resourceType": "Encounter", "id": "ENC3", "status": "in-progress",
+      "class": {"code": "IMP", "display": "inpatient"},
+      "reasonCode": [{"text": "worsening dyspnea and leg edema"}],
+      "period": {"start": "2026-09-12T05:50:00Z"}}
+  },
+  "expected": {"order_set_id": "IP_HF_EXACERBATION",
+               "required_items": ["ITEM_HF_BNP", "ITEM_HF_BMP", "ITEM_HF_TROPONIN",
+                                  "ITEM_HF_ECG", "ITEM_HF_ECHO", "ITEM_HF_FUROSEMIDE",
+                                  "ITEM_HF_WEIGHTS", "ITEM_HF_IO", "ITEM_HF_DIET",
+                                  "ITEM_HF_CARDS"],
+               "forbidden_items": []}
+}

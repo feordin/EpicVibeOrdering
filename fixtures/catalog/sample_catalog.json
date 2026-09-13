@@ -1,43 +1,713 @@
 {
-  "meta": {"epic_version": "Feb 2026", "extracted_at": "2026-08-01T00:00:00Z", "site_id": "CUSTOMER1"},
+  "meta": {
+    "epic_version": "Feb 2026",
+    "extracted_at": "2026-08-01T00:00:00Z",
+    "site_id": "CUSTOMER1"
+  },
   "order_sets": [
     {
       "order_set_id": "AMB_DM2_NEWDX",
       "name": "Diabetes Mellitus Type 2 - New Diagnosis (Ambulatory)",
-      "keywords": ["diabetes", "a1c", "metformin", "glucose"],
-      "icd10_codes": ["E11"],
+      "keywords": [
+        "diabetes",
+        "a1c",
+        "metformin",
+        "glucose"
+      ],
+      "icd10_codes": [
+        "E11"
+      ],
       "groups": [
-        {"group_id": "G_LABS", "name": "Laboratory", "items": [
-          {"item_id": "ITEM_A1C", "name": "Hemoglobin A1c", "order_type": "procedure", "default_selected": true,
-           "variants": [{"variant_id": "V_A1C", "code": "PREF_A1C", "display": "Hemoglobin A1c", "defaults": {"priority": "Routine"}}]},
-          {"item_id": "ITEM_LIPID", "name": "Lipid Panel", "order_type": "procedure", "default_selected": true,
-           "variants": [{"variant_id": "V_LIPID", "code": "PREF_LIPID", "display": "Lipid Panel", "defaults": {"priority": "Routine"}}]},
-          {"item_id": "ITEM_UMALB", "name": "Urine Microalbumin/Creatinine Ratio", "order_type": "procedure", "default_selected": true,
-           "variants": [{"variant_id": "V_UMALB", "code": "PREF_UMALB", "display": "Urine Microalbumin/Creatinine Ratio", "defaults": {"priority": "Routine"}}]}
-        ]},
-        {"group_id": "G_MEDS", "name": "Medications", "items": [
-          {"item_id": "ITEM_METFORMIN", "name": "Metformin", "order_type": "medication", "default_selected": true,
-           "variants": [
-             {"variant_id": "V_MET_500", "code": "PREF_MET_500", "display": "metFORMIN 500 mg tablet BID", "defaults": {"dose": "500 mg", "route": "oral", "frequency": "BID"}},
-             {"variant_id": "V_MET_1000", "code": "PREF_MET_1000", "display": "metFORMIN 1000 mg tablet BID", "defaults": {"dose": "1000 mg", "route": "oral", "frequency": "BID"}}
-           ]}
-        ]},
-        {"group_id": "G_REF", "name": "Referrals", "items": [
-          {"item_id": "ITEM_RETINAL", "name": "Ophthalmology Referral - Diabetic Retinal Exam", "order_type": "procedure", "default_selected": false,
-           "variants": [{"variant_id": "V_RETINAL", "code": "PREF_RETINAL", "display": "Referral to Ophthalmology", "defaults": {}}]}
-        ]}
+        {
+          "group_id": "G_LABS",
+          "name": "Laboratory",
+          "items": [
+            {
+              "item_id": "ITEM_A1C",
+              "name": "Hemoglobin A1c",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_A1C",
+                  "code": "PREF_A1C",
+                  "display": "Hemoglobin A1c",
+                  "defaults": {
+                    "priority": "Routine"
+                  }
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_LIPID",
+              "name": "Lipid Panel",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_LIPID",
+                  "code": "PREF_LIPID",
+                  "display": "Lipid Panel",
+                  "defaults": {
+                    "priority": "Routine"
+                  }
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_UMALB",
+              "name": "Urine Microalbumin/Creatinine Ratio",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_UMALB",
+                  "code": "PREF_UMALB",
+                  "display": "Urine Microalbumin/Creatinine Ratio",
+                  "defaults": {
+                    "priority": "Routine"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "group_id": "G_MEDS",
+          "name": "Medications",
+          "items": [
+            {
+              "item_id": "ITEM_METFORMIN",
+              "name": "Metformin",
+              "order_type": "medication",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_MET_500",
+                  "code": "PREF_MET_500",
+                  "display": "metFORMIN 500 mg tablet BID",
+                  "defaults": {
+                    "dose": "500 mg",
+                    "route": "oral",
+                    "frequency": "BID"
+                  }
+                },
+                {
+                  "variant_id": "V_MET_1000",
+                  "code": "PREF_MET_1000",
+                  "display": "metFORMIN 1000 mg tablet BID",
+                  "defaults": {
+                    "dose": "1000 mg",
+                    "route": "oral",
+                    "frequency": "BID"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "group_id": "G_REF",
+          "name": "Referrals",
+          "items": [
+            {
+              "item_id": "ITEM_RETINAL",
+              "name": "Ophthalmology Referral - Diabetic Retinal Exam",
+              "order_type": "procedure",
+              "default_selected": false,
+              "variants": [
+                {
+                  "variant_id": "V_RETINAL",
+                  "code": "PREF_RETINAL",
+                  "display": "Referral to Ophthalmology",
+                  "defaults": {}
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     {
       "order_set_id": "AMB_HTN",
       "name": "Hypertension Management (Ambulatory)",
-      "keywords": ["hypertension", "blood pressure"],
-      "icd10_codes": ["I10"],
+      "keywords": [
+        "hypertension",
+        "blood pressure"
+      ],
+      "icd10_codes": [
+        "I10"
+      ],
       "groups": [
-        {"group_id": "G_LABS", "name": "Laboratory", "items": [
-          {"item_id": "ITEM_BMP", "name": "Basic Metabolic Panel", "order_type": "procedure", "default_selected": true,
-           "variants": [{"variant_id": "V_BMP", "code": "PREF_BMP", "display": "Basic Metabolic Panel", "defaults": {"priority": "Routine"}}]}
-        ]}
+        {
+          "group_id": "G_LABS",
+          "name": "Laboratory",
+          "items": [
+            {
+              "item_id": "ITEM_BMP",
+              "name": "Basic Metabolic Panel",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_BMP",
+                  "code": "PREF_BMP",
+                  "display": "Basic Metabolic Panel",
+                  "defaults": {
+                    "priority": "Routine"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order_set_id": "ED_CAP_ADMIT",
+      "name": "Community-Acquired Pneumonia - Admission (ED/Inpatient)",
+      "keywords": [
+        "pneumonia",
+        "community-acquired",
+        "cap",
+        "lobar",
+        "respiratory",
+        "consolidation"
+      ],
+      "icd10_codes": [
+        "J18",
+        "J13",
+        "J15",
+        "J12"
+      ],
+      "groups": [
+        {
+          "group_id": "G_LABS",
+          "name": "Laboratory",
+          "items": [
+            {
+              "item_id": "ITEM_CAP_CBC",
+              "name": "CBC with Differential",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_CAP_CBC",
+                  "code": "PREF_CBC_DIFF",
+                  "display": "CBC with Differential",
+                  "defaults": {
+                    "priority": "STAT",
+                    "specimen": "Blood"
+                  },
+                  "clinical_code": "57021-8",
+                  "clinical_code_system": "http://loinc.org"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_CAP_BMP",
+              "name": "Basic Metabolic Panel",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_CAP_BMP",
+                  "code": "PREF_BMP_STAT",
+                  "display": "Basic Metabolic Panel",
+                  "defaults": {
+                    "priority": "STAT",
+                    "specimen": "Blood"
+                  },
+                  "clinical_code": "51990-0",
+                  "clinical_code_system": "http://loinc.org"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_CAP_BCX",
+              "name": "Blood Cultures x2 (two sets, separate sites)",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_CAP_BCX2",
+                  "code": "PREF_BLOOD_CX_X2",
+                  "display": "Blood Culture x2 sets, separate sites",
+                  "defaults": {
+                    "priority": "STAT",
+                    "specimen": "Blood",
+                    "note": "Draw before first antibiotic dose"
+                  },
+                  "clinical_code": "600-7",
+                  "clinical_code_system": "http://loinc.org"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_CAP_PCT",
+              "name": "Procalcitonin",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_CAP_PCT",
+                  "code": "PREF_PROCALCITONIN",
+                  "display": "Procalcitonin, serum",
+                  "defaults": {
+                    "priority": "STAT",
+                    "specimen": "Blood"
+                  },
+                  "clinical_code": "33959-8",
+                  "clinical_code_system": "http://loinc.org"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "group_id": "G_IMAGING",
+          "name": "Imaging",
+          "items": [
+            {
+              "item_id": "ITEM_CAP_CXR",
+              "name": "Chest X-Ray",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_CAP_CXR_2V",
+                  "code": "PREF_CXR_2V",
+                  "display": "Chest X-Ray, 2 views (PA and lateral)",
+                  "defaults": {
+                    "priority": "STAT",
+                    "reason": "Rule out consolidation"
+                  },
+                  "clinical_code": "71046",
+                  "clinical_code_system": "http://www.ama-assn.org/go/cpt"
+                },
+                {
+                  "variant_id": "V_CAP_CXR_PORT",
+                  "code": "PREF_CXR_PORTABLE",
+                  "display": "Chest X-Ray, portable 1 view",
+                  "defaults": {
+                    "priority": "STAT",
+                    "reason": "Patient unable to stand"
+                  },
+                  "clinical_code": "71045",
+                  "clinical_code_system": "http://www.ama-assn.org/go/cpt"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "group_id": "G_MEDS",
+          "name": "Antibiotics",
+          "items": [
+            {
+              "item_id": "ITEM_CAP_CEFTRIAXONE",
+              "name": "Ceftriaxone",
+              "order_type": "medication",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_CAP_CTX_1G",
+                  "code": "PREF_CTX_1G_IV_Q24",
+                  "display": "cefTRIAXone 1 g IV q24h",
+                  "defaults": {
+                    "dose": "1 g",
+                    "route": "IV",
+                    "frequency": "q24h"
+                  },
+                  "clinical_code": "1665005",
+                  "clinical_code_system": "http://www.nlm.nih.gov/research/umls/rxnorm"
+                },
+                {
+                  "variant_id": "V_CAP_CTX_2G",
+                  "code": "PREF_CTX_2G_IV_Q24",
+                  "display": "cefTRIAXone 2 g IV q24h",
+                  "defaults": {
+                    "dose": "2 g",
+                    "route": "IV",
+                    "frequency": "q24h"
+                  },
+                  "clinical_code": "1665021",
+                  "clinical_code_system": "http://www.nlm.nih.gov/research/umls/rxnorm"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_CAP_AZITHRO",
+              "name": "Azithromycin",
+              "order_type": "medication",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_CAP_AZI_IV",
+                  "code": "PREF_AZI_500_IV_QD",
+                  "display": "azithromycin 500 mg IV daily",
+                  "defaults": {
+                    "dose": "500 mg",
+                    "route": "IV",
+                    "frequency": "daily"
+                  },
+                  "clinical_code": "1665222",
+                  "clinical_code_system": "http://www.nlm.nih.gov/research/umls/rxnorm"
+                },
+                {
+                  "variant_id": "V_CAP_AZI_PO",
+                  "code": "PREF_AZI_500_PO_QD",
+                  "display": "azithromycin 500 mg PO daily",
+                  "defaults": {
+                    "dose": "500 mg",
+                    "route": "oral",
+                    "frequency": "daily"
+                  },
+                  "clinical_code": "308460",
+                  "clinical_code_system": "http://www.nlm.nih.gov/research/umls/rxnorm"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_CAP_LEVOFLOX",
+              "name": "Levofloxacin (beta-lactam allergy alternative)",
+              "order_type": "medication",
+              "default_selected": false,
+              "variants": [
+                {
+                  "variant_id": "V_CAP_LEVO_750",
+                  "code": "PREF_LEVO_750_IV_QD",
+                  "display": "levoFLOXacin 750 mg IV daily",
+                  "defaults": {
+                    "dose": "750 mg",
+                    "route": "IV",
+                    "frequency": "daily"
+                  },
+                  "clinical_code": "1665101",
+                  "clinical_code_system": "http://www.nlm.nih.gov/research/umls/rxnorm"
+                },
+                {
+                  "variant_id": "V_CAP_LEVO_500",
+                  "code": "PREF_LEVO_500_IV_QD",
+                  "display": "levoFLOXacin 500 mg IV daily (renal adjusted)",
+                  "defaults": {
+                    "dose": "500 mg",
+                    "route": "IV",
+                    "frequency": "daily"
+                  },
+                  "clinical_code": "1665097",
+                  "clinical_code_system": "http://www.nlm.nih.gov/research/umls/rxnorm"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "group_id": "G_NURSING",
+          "name": "Nursing and Isolation",
+          "items": [
+            {
+              "item_id": "ITEM_CAP_SPO2",
+              "name": "Continuous Pulse Oximetry",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_CAP_SPO2",
+                  "code": "PREF_SPO2_CONT",
+                  "display": "Continuous SpO2 monitoring",
+                  "defaults": {
+                    "frequency": "continuous",
+                    "note": "Notify provider for SpO2 below 90%"
+                  },
+                  "clinical_code": "59408-5",
+                  "clinical_code_system": "http://loinc.org"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_CAP_ISOLATION",
+              "name": "Respiratory Isolation Precautions",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_CAP_ISO_DROPLET",
+                  "code": "PREF_ISO_DROPLET",
+                  "display": "Droplet (respiratory) isolation precautions",
+                  "defaults": {
+                    "note": "Until respiratory viral panel negative"
+                  },
+                  "clinical_code": "40174006",
+                  "clinical_code_system": "http://snomed.info/sct"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order_set_id": "IP_HF_EXACERBATION",
+      "name": "Heart Failure Exacerbation - Inpatient",
+      "keywords": [
+        "heart",
+        "failure",
+        "hfref",
+        "chf",
+        "congestive",
+        "volume overload",
+        "dyspnea",
+        "edema"
+      ],
+      "icd10_codes": [
+        "I50"
+      ],
+      "groups": [
+        {
+          "group_id": "G_LABS",
+          "name": "Laboratory",
+          "items": [
+            {
+              "item_id": "ITEM_HF_BNP",
+              "name": "B-Type Natriuretic Peptide (BNP)",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_HF_BNP",
+                  "code": "PREF_BNP",
+                  "display": "BNP, serum",
+                  "defaults": {
+                    "priority": "STAT",
+                    "specimen": "Blood"
+                  },
+                  "clinical_code": "30934-4",
+                  "clinical_code_system": "http://loinc.org"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_HF_BMP",
+              "name": "Basic Metabolic Panel",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_HF_BMP_STAT",
+                  "code": "PREF_BMP_HF_STAT",
+                  "display": "Basic Metabolic Panel, STAT",
+                  "defaults": {
+                    "priority": "STAT",
+                    "specimen": "Blood"
+                  },
+                  "clinical_code": "51990-0",
+                  "clinical_code_system": "http://loinc.org"
+                },
+                {
+                  "variant_id": "V_HF_BMP_DAILY",
+                  "code": "PREF_BMP_HF_DAILY",
+                  "display": "Basic Metabolic Panel, daily x3",
+                  "defaults": {
+                    "priority": "Routine",
+                    "frequency": "daily x3",
+                    "specimen": "Blood"
+                  },
+                  "clinical_code": "51990-0",
+                  "clinical_code_system": "http://loinc.org"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_HF_TROPONIN",
+              "name": "High-Sensitivity Troponin I",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_HF_TROP",
+                  "code": "PREF_TROPONIN_HS",
+                  "display": "Troponin I, high sensitivity",
+                  "defaults": {
+                    "priority": "STAT",
+                    "specimen": "Blood",
+                    "note": "Repeat at 3 hours"
+                  },
+                  "clinical_code": "89579-7",
+                  "clinical_code_system": "http://loinc.org"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "group_id": "G_DIAG",
+          "name": "Diagnostics",
+          "items": [
+            {
+              "item_id": "ITEM_HF_ECG",
+              "name": "12-Lead ECG",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_HF_ECG",
+                  "code": "PREF_ECG_12LEAD",
+                  "display": "ECG, 12-lead with interpretation",
+                  "defaults": {
+                    "priority": "STAT"
+                  },
+                  "clinical_code": "93000",
+                  "clinical_code_system": "http://www.ama-assn.org/go/cpt"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_HF_ECHO",
+              "name": "Transthoracic Echocardiogram",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_HF_ECHO",
+                  "code": "PREF_ECHO_TTE",
+                  "display": "Echocardiogram, transthoracic complete with Doppler",
+                  "defaults": {
+                    "priority": "Routine",
+                    "reason": "Assess LV ejection fraction"
+                  },
+                  "clinical_code": "93306",
+                  "clinical_code_system": "http://www.ama-assn.org/go/cpt"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "group_id": "G_MEDS",
+          "name": "Diuresis",
+          "items": [
+            {
+              "item_id": "ITEM_HF_FUROSEMIDE",
+              "name": "Furosemide IV",
+              "order_type": "medication",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_HF_FURO_40",
+                  "code": "PREF_FURO_40_IV_BID",
+                  "display": "furosemide 40 mg IV q12h",
+                  "defaults": {
+                    "dose": "40 mg",
+                    "route": "IV",
+                    "frequency": "q12h"
+                  },
+                  "clinical_code": "1719291",
+                  "clinical_code_system": "http://www.nlm.nih.gov/research/umls/rxnorm"
+                },
+                {
+                  "variant_id": "V_HF_FURO_80",
+                  "code": "PREF_FURO_80_IV_BID",
+                  "display": "furosemide 80 mg IV q12h",
+                  "defaults": {
+                    "dose": "80 mg",
+                    "route": "IV",
+                    "frequency": "q12h"
+                  },
+                  "clinical_code": "1719290",
+                  "clinical_code_system": "http://www.nlm.nih.gov/research/umls/rxnorm"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "group_id": "G_NURSING",
+          "name": "Nursing and Diet",
+          "items": [
+            {
+              "item_id": "ITEM_HF_WEIGHTS",
+              "name": "Daily Weights",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_HF_WEIGHTS",
+                  "code": "PREF_DAILY_WEIGHTS",
+                  "display": "Daily standing weight, same scale",
+                  "defaults": {
+                    "frequency": "daily",
+                    "note": "Before breakfast, same scale"
+                  },
+                  "clinical_code": "29463-7",
+                  "clinical_code_system": "http://loinc.org"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_HF_IO",
+              "name": "Strict Intake and Output",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_HF_IO",
+                  "code": "PREF_STRICT_IO",
+                  "display": "Strict intake and output",
+                  "defaults": {
+                    "frequency": "q shift",
+                    "note": "Notify provider if urine output below 30 mL/hr"
+                  },
+                  "clinical_code": "9192-6",
+                  "clinical_code_system": "http://loinc.org"
+                }
+              ]
+            },
+            {
+              "item_id": "ITEM_HF_DIET",
+              "name": "Sodium-Restricted Diet",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_HF_DIET_2G",
+                  "code": "PREF_DIET_NA_2G",
+                  "display": "Diet: 2 g sodium, 1.5 L fluid restriction",
+                  "defaults": {
+                    "note": "2 g sodium; 1.5 L fluid restriction"
+                  },
+                  "clinical_code": "435801000124108",
+                  "clinical_code_system": "http://snomed.info/sct"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "group_id": "G_CONSULT",
+          "name": "Consults",
+          "items": [
+            {
+              "item_id": "ITEM_HF_CARDS",
+              "name": "Cardiology Consult",
+              "order_type": "procedure",
+              "default_selected": true,
+              "variants": [
+                {
+                  "variant_id": "V_HF_CARDS",
+                  "code": "PREF_CONSULT_CARDS",
+                  "display": "Consult to Cardiology",
+                  "defaults": {
+                    "priority": "Routine",
+                    "reason": "Heart failure exacerbation management"
+                  },
+                  "clinical_code": "306111000000100",
+                  "clinical_code_system": "http://snomed.info/sct"
+                }
+              ]
+            }
+          ]
+        }
       ]
     }
   ]

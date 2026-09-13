@@ -28,9 +28,12 @@ def test_suggestion_cards():
     res = med["actions"][0]["resource"]
     assert res["resourceType"] == "MedicationRequest" and res["status"] == "draft"
     assert res["medicationCodeableConcept"]["coding"][0]["code"] == "PREF_MET_500"
+    assert res["medicationCodeableConcept"]["text"]            # sandbox requires text alongside coding[0].code
     assert res["subject"]["reference"] == "Patient/PAT1"
     a1c = [s for s in card["suggestions"] if s["label"] == "Hemoglobin A1c"][0]
-    assert a1c["actions"][0]["resource"]["resourceType"] == "ServiceRequest"
+    a1c_res = a1c["actions"][0]["resource"]
+    assert a1c_res["resourceType"] == "ServiceRequest"
+    assert a1c_res["code"]["text"]                             # symmetry with medicationCodeableConcept.text
     assert "500 mg BID" in card["detail"]                      # advisory values in markdown
 
 def test_exclude_codes():
@@ -38,8 +41,12 @@ def test_exclude_codes():
     assert len(cards[0]["suggestions"]) == 1
 
 def test_summary_card():
-    card = render_summary_card(VP)
+    card = render_summary_card(VP, IDX)
     assert "suggestions" not in card and "2" in card["summary"]
+    name = IDX.get_order_set("AMB_DM2_NEWDX").name
+    assert name in card["detail"]
+    assert "AMB_DM2_NEWDX" not in card["detail"]      # ids italicize in markdown
+    assert "_" not in card["detail"]
 
 def test_missing_items_card():
     card = render_missing_items_card(VP, IDX, frozenset({"PREF_MET_500"}))

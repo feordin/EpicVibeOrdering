@@ -1,0 +1,38 @@
+{
+  "name": "cap_admit",
+  "context": {"userId": "Practitioner/PRACT2", "patientId": "PAT2", "encounterId": "ENC2"},
+  "prefetch": {
+    "patient": {"resourceType": "Patient", "id": "PAT2", "gender": "male", "birthDate": "1959-04-02"},
+    "conditions": {"resourceType": "Bundle", "type": "searchset", "entry": [
+      {"resource": {"resourceType": "Condition", "id": "c1",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "J18.9",
+                             "display": "Community-acquired pneumonia"}]},
+        "subject": {"reference": "Patient/PAT2"}}},
+      {"resource": {"resourceType": "Condition", "id": "c2",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "N18.3",
+                             "display": "Chronic kidney disease stage 3"}]},
+        "subject": {"reference": "Patient/PAT2"}}}]},
+    "medications": {"resourceType": "Bundle", "type": "searchset", "entry": [
+      {"resource": {"resourceType": "MedicationRequest", "id": "m1", "status": "active", "intent": "order",
+        "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                                                  "code": "745679", "display": "tiotropium inhalation"}]},
+        "subject": {"reference": "Patient/PAT2"}}}]},
+    "observations": {"resourceType": "Bundle", "type": "searchset", "entry": [
+      {"resource": {"resourceType": "Observation", "id": "ob1", "status": "final",
+        "category": [{"coding": [{"code": "laboratory"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "48642-3", "display": "eGFR"}]},
+        "effectiveDateTime": "2026-09-12T08:00:00Z",
+        "valueQuantity": {"value": 48, "unit": "mL/min/1.73m2"}}}]},
+    "allergies": {"resourceType": "Bundle", "type": "searchset", "entry": []},
+    "encounter": {"resourceType": "Encounter", "id": "ENC2", "status": "in-progress",
+      "class": {"code": "EMER", "display": "emergency"},
+      "reasonCode": [{"text": "shortness of breath and fever"}],
+      "period": {"start": "2026-09-12T07:30:00Z"}}
+  },
+  "expected": {"order_set_id": "ED_CAP_ADMIT",
+               "required_items": ["ITEM_CAP_CBC", "ITEM_CAP_BMP", "ITEM_CAP_BCX",
+                                  "ITEM_CAP_CXR", "ITEM_CAP_CEFTRIAXONE", "ITEM_CAP_AZITHRO"],
+               "forbidden_items": []}
+}

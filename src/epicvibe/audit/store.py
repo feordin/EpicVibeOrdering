@@ -9,7 +9,8 @@ from epicvibe.proposal.validation import ValidatedProposal
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS proposals (
   id INTEGER PRIMARY KEY, encounter_key TEXT NOT NULL, created_at TEXT NOT NULL,
-  model TEXT NOT NULL, proposal_json TEXT NOT NULL, violations_json TEXT NOT NULL);
+  model TEXT NOT NULL, proposal_json TEXT NOT NULL, violations_json TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'proposal');
 CREATE TABLE IF NOT EXISTS feedback (
   id INTEGER PRIMARY KEY, service_id TEXT NOT NULL, card_uuid TEXT,
   outcome TEXT, received_at TEXT NOT NULL, raw_json TEXT NOT NULL);
@@ -25,17 +26,32 @@ class AuditStore:
         self._conn = sqlite3.connect(str(path), check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._conn.executescript(_SCHEMA)
+        self._migrate()
         self._lock = threading.Lock()
 
-    def record_proposal(self, encounter_key: str, vp: ValidatedProposal, model: str) -> int:
+    def _migrate(self) -> None:
+        """Additive migrations for databases created by an earlier version."""
+        columns = {r["name"] for r in self._conn.execute("PRAGMA table_info(proposals)")}
+        if "kind" not in columns:
+            self._conn.execute(
+                "ALTER TABLE proposals ADD COLUMN kind TEXT NOT NULL DEFAULT 'proposal'")
+            self._conn.commit()
+
+    def record_proposal(self, encounter_key: str, vp: ValidatedProposal, model: str,
+                        kind: str = "proposal") -> int:
         with self._lock:
             cur = self._conn.execute(
-                "INSERT INTO proposals (encounter_key, created_at, model, proposal_json, violations_json)"
-                " VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO proposals (encounter_key, created_at, model, proposal_json,"
+                " violations_json, kind) VALUES (?, ?, ?, ?, ?, ?)",
                 (encounter_key, _now(), model, vp.proposal.model_dump_json(),
-                 json.dumps([v.model_dump() for v in vp.violations])))
+                 json.dumps([v.model_dump() for v in vp.violations]), kind))
             self._conn.commit()
             return cur.lastrowid
+
+    def record_refinement(self, encounter_key: str, vp: ValidatedProposal,
+                          model: str = "clinician") -> int:
+        """A clinician-refined set handed back from the SMART app."""
+        return self.record_proposal(encounter_key, vp, model, kind="refinement")
 
     def record_feedback(self, service_id: str, payload: dict) -> int:
         with self._lock:
@@ -48,9 +64,13 @@ class AuditStore:
             self._conn.commit()
             return len(items)
 
-    def proposals(self) -> list[dict]:
+    def proposals(self, kind: str | None = None) -> list[dict]:
         with self._lock:
-            return [dict(r) for r in self._conn.execute("SELECT * FROM proposals")]
+            if kind is None:
+                rows = self._conn.execute("SELECT * FROM proposals")
+            else:
+                rows = self._conn.execute("SELECT * FROM proposals WHERE kind = ?", (kind,))
+            return [dict(r) for r in rows]
 
     def feedback(self) -> list[dict]:
         with self._lock:

@@ -6,7 +6,8 @@ from epicvibe.catalog.loader import load_catalog
 
 def test_loads_sample():
     cat = load_catalog(Path("fixtures/catalog/sample_catalog.json"))
-    assert len(cat.order_sets) == 2
+    assert {o.order_set_id for o in cat.order_sets} == {
+        "AMB_DM2_NEWDX", "AMB_HTN", "ED_CAP_ADMIT", "IP_HF_EXACERBATION"}
 
 def test_warns_on_unknown_keys(tmp_path, caplog):
     data = {"meta": {}, "order_sets": [{"order_set_id": "X", "name": "X", "CUSTOM_COL": 1, "groups": []}]}

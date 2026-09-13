@@ -14,6 +14,7 @@ class ScenarioScore(BaseModel):
     grounded: bool
     recall: float
     precision: float
+    forbidden_hits: list[str] = []
 
 
 def score(vp: ValidatedProposal, expected: Expected, name: str) -> ScenarioScore:
@@ -23,6 +24,9 @@ def score(vp: ValidatedProposal, expected: Expected, name: str) -> ScenarioScore
     required = set(expected.required_items)
     forbidden = set(expected.forbidden_items)
     recall = len(included & required) / len(required) if required else 1.0
-    precision = (len(included - forbidden) / len(included)) if included else 0.0
+    # Precision counts every included item that was not asked for, not just the
+    # explicitly forbidden ones.
+    precision = (len(included & required) / len(included)) if included else 0.0
     return ScenarioScore(name=name, grounded=not vp.violations,
-                         recall=recall, precision=precision)
+                         recall=recall, precision=precision,
+                         forbidden_hits=sorted(included & forbidden))
