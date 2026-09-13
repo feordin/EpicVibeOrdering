@@ -1,0 +1,119 @@
+name: epicvibe-reference-sandbox
+
+# Second, fully containerised demo of the EpicVibe CDS service that uses only
+# third-party reference implementations of the standards:
+#
+#   HAPI FHIR R4          :8080  - the FHIR server (source of truth for data)
+#   SMART App Launcher v2 :8090  - real SMART on FHIR OAuth2, proxying HAPI
+#   CDS Hooks Sandbox     :8095  - the reference CDS Hooks client (browser SPA)
+#   seed (one-shot)              - loads fixtures/mockehr/patients/*.json into HAPI
+#
+# The EpicVibe CDS service itself normally runs on the HOST at :8000 so the dev
+# loop stays fast.  `--profile cds` additionally runs it in a container.
+#
+# Note on hostnames: the browser reaches everything on localhost; containers
+# reach the host via host.docker.internal and each other via service names.
+
+services:
+  hapi:
+    image: hapiproject/hapi:v8.0.0
+    container_name: refsbx-hapi
+    ports:
+      - "8080:8080"
+    environment:
+      # R4 is the default but be explicit - the whole demo assumes R4.
+      hapi.fhir.fhir_version: R4
+      # Let the seed bundle use absolute/cross-resource references freely.
+      hapi.fhir.allow_external_references: "true"
+      hapi.fhir.allow_multiple_delete: "true"
+      # Client ids like `pat-okafor` must survive a PUT-by-id create.
+      hapi.fhir.client_id_strategy: ANY
+      # Browser tools (and the launcher) talk to HAPI cross-origin.
+      hapi.fhir.cors.allowed_origin: "*"
+      hapi.fhir.cors.allow_Credentials: "false"
+      spring.main.allow-circular-references: "true"
+    # No healthcheck: hapiproject/hapi is a distroless image with no /bin/sh and
+    # no wget/curl, so every CMD-SHELL probe fails with "stat /bin/sh: no such
+    # file or directory".  The seed container polls /fhir/metadata itself
+    # (WAIT_SECONDS, default 300s), which is where the readiness gate lives.
+
+  # Exposes HAPI's /fhir base at the root of its own origin - see fhir-root.conf
+  # for why the SMART launcher needs a path-less FHIR base URL.
+  fhir-root:
+    image: nginx:1.27-alpine
+    container_name: refsbx-fhir-root
+    depends_on:
+      hapi:
+        condition: service_started
+    volumes:
+      - ./fhir-root.conf:/etc/nginx/conf.d/default.conf:ro
+
+  smart-launcher:
+    image: smartonfhir/smart-launcher-2:latest
+    container_name: refsbx-smart-launcher
+    depends_on:
+      fhir-root:
+        condition: service_started
+    ports:
+      - "8090:80"
+    environment:
+      NODE_ENV: production
+      PORT: "80"
+      SECRET: "epicvibe-reference-sandbox-dev-secret"
+      # Only R4 is wired up; the hosted r2/r3 defaults are disabled so the UI
+      # cannot accidentally launch against smarthealthit.org.
+      FHIR_SERVER_R2: ""
+      FHIR_SERVER_R3: ""
+      # Path-less on purpose (see fhir-root.conf).
+      FHIR_SERVER_R4: "http://fhir-root"
+      # The launcher's own patient picker is hosted; leave it pointing at the
+      # public instance (it is only used by the launcher UI, not by our app).
+      PICKER_ORIGIN: "https://patient-browser.smarthealthit.org"
+
+  cds-sandbox:
+    build:
+      context: ./cds-sandbox
+      # Pinned upstream commit - see cds-sandbox/Dockerfile.
+      args:
+        # Override in ./.env when registry.npmjs.org is not reachable from
+        # inside Docker (corporate TLS inspection), e.g.
+        #   NPM_REGISTRY=https://your-mirror.example/npm/
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org/}
+    image: epicvibe/cds-hooks-sandbox:pinned
+    container_name: refsbx-cds-sandbox
+    ports:
+      - "8095:80"
+
+  seed:
+    image: python:3.12-alpine
+    container_name: refsbx-seed
+    depends_on:
+      hapi:
+        condition: service_started
+    volumes:
+      - ./seed:/seed:ro
+      - ../../fixtures/mockehr/patients:/fixtures:ro
+    environment:
+      FHIR_BASE: http://hapi:8080/fhir
+      FIXTURE_DIR: /fixtures
+    command: ["python", "/seed/seed.py"]
+    restart: "no"
+
+  # Optional: run the EpicVibe CDS service in the compose network too.
+  #   docker compose --profile cds up -d --build cds
+  # Default demo keeps it on the host (uvicorn ... --port 8000) for hot reload.
+  cds:
+    profiles: ["cds"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: epicvibe/cds:dev
+    container_name: refsbx-cds
+    ports:
+      - "8000:8000"
+    environment:
+      EPICVIBE_INFERENCE_PROVIDER: demo
+      EPICVIBE_CORS_ALLOW_ORIGINS: '["http://localhost:8095","http://localhost:8090","http://localhost:8100"]'
+      EPICVIBE_SMART_ALLOWED_ISSUERS: '["http://localhost:8090/v/r4/fhir","http://host.docker.internal:8090/v/r4/fhir","http://localhost:8100/fhir","http://127.0.0.1:8100/fhir"]'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
