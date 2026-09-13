@@ -1,0 +1,47 @@
+[Ambient capture — Emergency Department, Resuscitation Bay 1 — EHR DOWNTIME IN EFFECT]
+
+CHARGE NURSE: Dr. Whitfield, resus bay one. The patient is Mr. Desmond Oyelaran, 74 years old, male, brought in by EMS from Maple Ridge nursing home. He weighs 70 kg. Blood pressure 82 over 48, heart rate 124, temp 39.2, respiratory rate 28, sat 93 on two liters.
+
+DR. WHITFIELD: That's a qSOFA of two at least. Is he following commands?
+
+CHARGE NURSE: He's confused. The facility says he was alert yesterday.
+
+DR. WHITFIELD: Mr. Oyelaran, can you tell me where you are? [no answer] Okay. What did EMS give?
+
+PARAMEDIC: Two hundred and fifty mLs of saline en route, no antibiotics.
+
+DR. WHITFIELD: Does the facility paperwork list allergies?
+
+CHARGE NURSE: It says allergic to penicillin — reaction is hives.
+
+DR. WHITFIELD: Penicillin allergy, hives, not anaphylaxis. Noted. Any source? Cough, urine, skin?
+
+CHARGE NURSE: The transfer note says he's had burning with urination for three days and they started noticing the confusion last night. There's a sacral pressure ulcer, stage two, looks clean.
+
+DR. WHITFIELD: Let me look at him. [pause] He's mottled at the knees, capillary refill about four seconds, he's warm and flushed. Lungs clear. Abdomen soft, suprapubic tenderness. Sacral wound without surrounding erythema or drainage.
+
+DR. WHITFIELD: This is septic shock, presumed urinary source, and I want the hour-one bundle running now. Nurse — draw a lactate immediately and set up a repeat lactate in two hours. Two sets of blood cultures, and they go in before any antibiotic. CBC with differential, comprehensive metabolic panel, PT/INR and aPTT, and a urinalysis with reflex culture.
+
+CHARGE NURSE: Cultures before antibiotics, understood.
+
+DR. WHITFIELD: He's 70 kilos, so thirty mLs per kilogram — that's a 2100 mL normal saline bolus, wide open.
+
+CHARGE NURSE: Thirty mLs per kilo bolus, going up now.
+
+DR. WHITFIELD: Antibiotics — he's penicillin-allergic with hives only, so I'm comfortable with cefepime. Cefepime 2 grams IV every eight hours. And vancomycin 1500 mg IV every twelve hours for the pressure ulcer coverage. Hold the piperacillin-tazobactam given the allergy.
+
+CHARGE NURSE: Cefepime 2 grams q8, vancomycin 1500 q12. No pip-tazo.
+
+DR. WHITFIELD: Right. Portable chest X-ray STAT to rule out a pulmonary source. Vital signs every fifteen minutes until he stabilizes. Strict intake and output with hourly urine output — put a catheter in. Keep him NPO.
+
+CHARGE NURSE: Do you want pressors ready?
+
+DR. WHITFIELD: Have norepinephrine at the bedside but do not start it yet — let's see his pressure after the bolus. If the MAP stays under 65 after the full 30 per kilo, start norepinephrine and titrate to a MAP above 65.
+
+DR. WHITFIELD: And call the intensivist now. He needs an ICU bed, not a floor bed.
+
+CHARGE NURSE: Calling critical care.
+
+DR. WHITFIELD: Everything I just said goes into the downtime ordering tool — Epic is down and I am not writing this on paper.
+
+[End of capture]

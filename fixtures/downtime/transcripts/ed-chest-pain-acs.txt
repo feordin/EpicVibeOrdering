@@ -1,0 +1,59 @@
+[Ambient capture — Emergency Department, ED Room 12 — EHR DOWNTIME IN EFFECT]
+
+TRIAGE NURSE: Dr. Okafor, the patient is Linda Castellano, ED Room 12. She's 61 years old, female. Blood pressure 156 over 92, heart rate 96, respiratory rate 20, sat 97 on room air, afebrile.
+
+DR. OKAFOR: Ms. Castellano, walk me through what happened.
+
+PATIENT: About two hours ago I was carrying groceries up the stairs and I got this crushing chest pressure right in the middle of my chest. It went down my left arm. I had to sit on the step.
+
+DR. OKAFOR: Did it go away?
+
+PATIENT: It eased off after maybe fifteen minutes when I rested, but it's still there, maybe a three out of ten. And I got sweaty — my shirt was soaked.
+
+DR. OKAFOR: Any shortness of breath?
+
+PATIENT: Yes, when it was at its worst I couldn't catch my breath.
+
+DR. OKAFOR: Nausea? Vomiting?
+
+PATIENT: A little queasy.
+
+DR. OKAFOR: Have you had anything like this before?
+
+PATIENT: Never like this. I get winded walking the dog lately but nothing in my chest.
+
+DR. OKAFOR: Do you take any medications?
+
+PATIENT: Metformin for my sugar, and amlodipine for blood pressure.
+
+DR. OKAFOR: Any allergies?
+
+PATIENT: No known drug allergies.
+
+DR. OKAFOR: Family history of heart trouble?
+
+PATIENT: My father had a heart attack at 58.
+
+DR. OKAFOR: Let me examine you. [pause] Heart is regular rate and rhythm, no murmurs, no rub. Lungs are clear bilaterally. No leg swelling, no calf tenderness. Chest wall is not tender to palpation — pressing on it doesn't reproduce the pain, which is not reassuring here.
+
+DR. OKAFOR: Ms. Castellano, this is exertional substernal chest pressure radiating to your left arm with diaphoresis, in a diabetic with a family history. I have to treat this as a possible acute coronary syndrome until proven otherwise.
+
+PATIENT: Is it a heart attack?
+
+DR. OKAFOR: That is exactly what we're going to find out over the next few hours. Nurse — twelve-lead ECG immediately, STAT, and bring it to me as soon as it's run. Chest X-ray, two views. Draw a high-sensitivity troponin now and a repeat troponin at three hours. Also a CBC and a basic metabolic panel.
+
+NURSE: Troponin now and repeat at three hours. Got it.
+
+DR. OKAFOR: Give aspirin 324 mg chewable, right now, by mouth. Put her on continuous cardiac telemetry and vital signs every hour until the troponins come back. Keep her NPO and on bed rest for now.
+
+NURSE: Aspirin 324 by mouth, telemetry, hourly vitals, NPO, bed rest.
+
+DR. OKAFOR: And page cardiology for a consult — urgent, not emergent. The question for them is whether she needs early invasive evaluation.
+
+NURSE: Do you want nitroglycerin?
+
+DR. OKAFOR: Hold the nitro for now, her pain is down to a three and I want to see the ECG first.
+
+DR. OKAFOR: Ms. Castellano, our order system is offline so I'm dictating all of this into the downtime application. Nothing gets missed. Sit tight.
+
+[End of capture]

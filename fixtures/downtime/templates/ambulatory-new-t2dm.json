@@ -1,0 +1,849 @@
+{
+  "template_id": "ambulatory-new-t2dm",
+  "name": "Ambulatory New Type 2 Diabetes",
+  "setting": "ambulatory",
+  "description": "New diagnosis of type 2 diabetes in clinic: baseline labs, metformin initiation, glucometer supplies, education and follow-up.",
+  "indications": [
+    "new type 2 diabetes",
+    "newly diagnosed diabetes mellitus type 2",
+    "hyperglycemia in clinic"
+  ],
+  "keywords": [
+    "type 2 diabetes",
+    "new diabetes",
+    "metformin",
+    "a1c",
+    "hemoglobin a1c",
+    "glucometer",
+    "diabetes education",
+    "dietitian",
+    "blurry vision",
+    "microalbumin",
+    "retinal",
+    "foot exam",
+    "clinic follow-up"
+  ],
+  "patient_fields": [
+    {
+      "field_id": "patient_name",
+      "label": "Patient name",
+      "kind": "text",
+      "required": true,
+      "hint": "Full name as stated in the encounter"
+    },
+    {
+      "field_id": "dob",
+      "label": "Date of birth",
+      "kind": "date",
+      "required": true,
+      "hint": "YYYY-MM-DD; if only an age is stated leave blank and note the age in chief complaint"
+    },
+    {
+      "field_id": "sex",
+      "label": "Sex",
+      "kind": "choice",
+      "required": true,
+      "choices": [
+        "male",
+        "female",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "field_id": "mrn",
+      "label": "MRN",
+      "kind": "text",
+      "required": false,
+      "hint": "Only if an MRN or armband number is spoken; otherwise leave blank (a downtime temp ID is assigned)"
+    },
+    {
+      "field_id": "weight_kg",
+      "label": "Weight",
+      "kind": "number",
+      "required": false,
+      "unit": "kg",
+      "hint": "Convert pounds to kg if needed"
+    },
+    {
+      "field_id": "allergies",
+      "label": "Allergies",
+      "kind": "text",
+      "required": true,
+      "hint": "Comma-separated; write NKDA if explicitly denied"
+    },
+    {
+      "field_id": "ordering_provider",
+      "label": "Ordering provider",
+      "kind": "text",
+      "required": true,
+      "hint": "Clinician who states the plan"
+    },
+    {
+      "field_id": "encounter_location",
+      "label": "Encounter location",
+      "kind": "text",
+      "required": true,
+      "hint": "Unit / room / clinic named in the encounter"
+    },
+    {
+      "field_id": "chief_complaint",
+      "label": "Chief complaint",
+      "kind": "text",
+      "required": true
+    }
+  ],
+  "orders": [
+    {
+      "order_id": "a1c",
+      "category": "lab",
+      "display": "Hemoglobin A1c",
+      "code": "4548-4",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine",
+        "indication": "new type 2 diabetes"
+      }
+    },
+    {
+      "order_id": "cmp",
+      "category": "lab",
+      "display": "Comprehensive metabolic panel",
+      "code": "24323-8",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine"
+      }
+    },
+    {
+      "order_id": "lipid",
+      "category": "lab",
+      "display": "Lipid panel, fasting",
+      "code": "57698-3",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine"
+      }
+    },
+    {
+      "order_id": "microalbumin",
+      "category": "lab",
+      "display": "Urine albumin/creatinine ratio",
+      "code": "9318-7",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine"
+      }
+    },
+    {
+      "order_id": "tsh",
+      "category": "lab",
+      "display": "TSH",
+      "code": "3016-3",
+      "code_system": "http://loinc.org",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine"
+      }
+    },
+    {
+      "order_id": "cbc",
+      "category": "lab",
+      "display": "CBC with differential",
+      "code": "57021-8",
+      "code_system": "http://loinc.org",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine"
+      }
+    },
+    {
+      "order_id": "vit-b12",
+      "category": "lab",
+      "display": "Vitamin B12, serum",
+      "code": "2132-9",
+      "code_system": "http://loinc.org",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine"
+      }
+    },
+    {
+      "order_id": "metformin",
+      "category": "medication",
+      "display": "Metformin 500 mg PO",
+      "code": "860975",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mg",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "500",
+        "dose_units": "mg",
+        "route": "PO",
+        "frequency": "daily",
+        "duration": "titrate to BID over 2 weeks"
+      }
+    },
+    {
+      "order_id": "atorvastatin",
+      "category": "medication",
+      "display": "Atorvastatin 20 mg PO",
+      "code": "617314",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mg",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "20",
+        "dose_units": "mg",
+        "route": "PO",
+        "frequency": "daily"
+      }
+    },
+    {
+      "order_id": "lisinopril",
+      "category": "medication",
+      "display": "Lisinopril 10 mg PO",
+      "code": "314077",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mg",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "10",
+        "dose_units": "mg",
+        "route": "PO",
+        "frequency": "daily"
+      }
+    },
+    {
+      "order_id": "glucometer",
+      "category": "nursing",
+      "display": "Glucometer, test strips and lancets",
+      "code": "337414009",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false,
+          "hint": "Parameters stated by the clinician"
+        },
+        {
+          "field_id": "testing_frequency",
+          "label": "Testing frequency",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. fasting daily"
+        }
+      ],
+      "defaults": {}
+    },
+    {
+      "order_id": "foot-exam",
+      "category": "nursing",
+      "display": "Comprehensive diabetic foot exam",
+      "code": "401191002",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false,
+          "hint": "Parameters stated by the clinician"
+        }
+      ],
+      "defaults": {}
+    },
+    {
+      "order_id": "followup",
+      "category": "nursing",
+      "display": "Clinic follow-up appointment",
+      "code": "183851006",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false,
+          "hint": "Parameters stated by the clinician"
+        },
+        {
+          "field_id": "interval",
+          "label": "Interval",
+          "kind": "text",
+          "required": true,
+          "hint": "e.g. 3 months"
+        }
+      ],
+      "defaults": {}
+    },
+    {
+      "order_id": "dietitian",
+      "category": "consult",
+      "display": "Diabetes education / registered dietitian referral",
+      "code": "306163007",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "question",
+          "label": "Consult question",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "defaults": {
+        "priority": "urgent"
+      }
+    },
+    {
+      "order_id": "ophtho",
+      "category": "consult",
+      "display": "Ophthalmology - dilated retinal exam",
+      "code": "183518005",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "question",
+          "label": "Consult question",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "defaults": {
+        "priority": "urgent"
+      }
+    },
+    {
+      "order_id": "diet",
+      "category": "diet",
+      "display": "Diet counseling order",
+      "code": "182922004",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "diet_type",
+          "label": "Diet type",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "regular",
+            "cardiac",
+            "carbohydrate-modified",
+            "2g sodium",
+            "NPO",
+            "clear liquids",
+            "full liquids"
+          ]
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "defaults": {
+        "diet_type": "carbohydrate-modified"
+      }
+    },
+    {
+      "order_id": "activity",
+      "category": "activity",
+      "display": "Exercise recommendation",
+      "code": "304510005",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "activity_level",
+          "label": "Activity level",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "bed rest",
+            "up with assistance",
+            "as tolerated",
+            "ambulate TID"
+          ]
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "defaults": {
+        "activity_level": "as tolerated"
+      }
+    }
+  ]
+}

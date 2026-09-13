@@ -1,0 +1,1108 @@
+{
+  "template_id": "dka-management",
+  "name": "Diabetic Ketoacidosis - Management",
+  "setting": "inpatient",
+  "description": "DKA protocol: insulin infusion, fluid resuscitation, potassium repletion and q1-2h glucose/chemistry monitoring.",
+  "indications": [
+    "diabetic ketoacidosis",
+    "DKA",
+    "hyperglycemia with anion gap acidosis"
+  ],
+  "keywords": [
+    "dka",
+    "diabetic ketoacidosis",
+    "ketones",
+    "anion gap",
+    "insulin drip",
+    "insulin infusion",
+    "kussmaul",
+    "polyuria",
+    "polydipsia",
+    "bicarbonate",
+    "type 1 diabetes"
+  ],
+  "patient_fields": [
+    {
+      "field_id": "patient_name",
+      "label": "Patient name",
+      "kind": "text",
+      "required": true,
+      "hint": "Full name as stated in the encounter"
+    },
+    {
+      "field_id": "dob",
+      "label": "Date of birth",
+      "kind": "date",
+      "required": true,
+      "hint": "YYYY-MM-DD; if only an age is stated leave blank and note the age in chief complaint"
+    },
+    {
+      "field_id": "sex",
+      "label": "Sex",
+      "kind": "choice",
+      "required": true,
+      "choices": [
+        "male",
+        "female",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "field_id": "mrn",
+      "label": "MRN",
+      "kind": "text",
+      "required": false,
+      "hint": "Only if an MRN or armband number is spoken; otherwise leave blank (a downtime temp ID is assigned)"
+    },
+    {
+      "field_id": "weight_kg",
+      "label": "Weight",
+      "kind": "number",
+      "required": false,
+      "unit": "kg",
+      "hint": "Convert pounds to kg if needed"
+    },
+    {
+      "field_id": "allergies",
+      "label": "Allergies",
+      "kind": "text",
+      "required": true,
+      "hint": "Comma-separated; write NKDA if explicitly denied"
+    },
+    {
+      "field_id": "ordering_provider",
+      "label": "Ordering provider",
+      "kind": "text",
+      "required": true,
+      "hint": "Clinician who states the plan"
+    },
+    {
+      "field_id": "encounter_location",
+      "label": "Encounter location",
+      "kind": "text",
+      "required": true,
+      "hint": "Unit / room / clinic named in the encounter"
+    },
+    {
+      "field_id": "chief_complaint",
+      "label": "Chief complaint",
+      "kind": "text",
+      "required": true
+    }
+  ],
+  "orders": [
+    {
+      "order_id": "bmp-q2",
+      "category": "lab",
+      "display": "Basic metabolic panel q2h",
+      "code": "51990-0",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT",
+        "indication": "DKA"
+      }
+    },
+    {
+      "order_id": "vbg",
+      "category": "lab",
+      "display": "Venous blood gas",
+      "code": "24338-6",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT"
+      }
+    },
+    {
+      "order_id": "bhb",
+      "category": "lab",
+      "display": "Beta-hydroxybutyrate, serum",
+      "code": "53060-2",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT"
+      }
+    },
+    {
+      "order_id": "cbc",
+      "category": "lab",
+      "display": "CBC with differential",
+      "code": "57021-8",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT"
+      }
+    },
+    {
+      "order_id": "serum-osm",
+      "category": "lab",
+      "display": "Serum osmolality",
+      "code": "2692-2",
+      "code_system": "http://loinc.org",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine"
+      }
+    },
+    {
+      "order_id": "a1c",
+      "category": "lab",
+      "display": "Hemoglobin A1c",
+      "code": "4548-4",
+      "code_system": "http://loinc.org",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine"
+      }
+    },
+    {
+      "order_id": "phos-mag",
+      "category": "lab",
+      "display": "Phosphorus and magnesium",
+      "code": "2777-1",
+      "code_system": "http://loinc.org",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT"
+      }
+    },
+    {
+      "order_id": "ua-ketones",
+      "category": "lab",
+      "display": "Urinalysis with ketones",
+      "code": "24357-6",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT"
+      }
+    },
+    {
+      "order_id": "ecg",
+      "category": "imaging",
+      "display": "Electrocardiogram, 12-lead",
+      "code": "93000",
+      "code_system": "http://www.ama-assn.org/go/cpt",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "contrast",
+          "label": "Contrast",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "none",
+            "IV",
+            "oral",
+            "IV and oral"
+          ]
+        },
+        {
+          "field_id": "requested_datetime",
+          "label": "Requested date/time",
+          "kind": "text",
+          "required": false,
+          "hint": "If a timing is stated, e.g. 'now', 'in the morning'"
+        }
+      ],
+      "defaults": {
+        "priority": "urgent",
+        "contrast": "none"
+      }
+    },
+    {
+      "order_id": "insulin-drip",
+      "category": "medication",
+      "display": "Regular insulin infusion 0.1 units/kg/hr",
+      "code": "311041",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "units",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "0.1",
+        "dose_units": "units",
+        "route": "IV",
+        "frequency": "continuous"
+      }
+    },
+    {
+      "order_id": "ns-bolus",
+      "category": "medication",
+      "display": "Normal saline bolus",
+      "code": "1807632",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mL",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "1000",
+        "dose_units": "mL",
+        "route": "IV",
+        "frequency": "once"
+      }
+    },
+    {
+      "order_id": "ns-maintenance",
+      "category": "medication",
+      "display": "Normal saline maintenance infusion",
+      "code": "1807632",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mL",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "250",
+        "dose_units": "mL",
+        "route": "IV",
+        "frequency": "continuous"
+      }
+    },
+    {
+      "order_id": "kcl",
+      "category": "medication",
+      "display": "Potassium chloride IV replacement",
+      "code": "8591",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mEq",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "20",
+        "dose_units": "mEq",
+        "route": "IV",
+        "frequency": "q4h"
+      }
+    },
+    {
+      "order_id": "d5",
+      "category": "medication",
+      "display": "Dextrose 5% added when glucose < 250 mg/dL",
+      "code": "4850",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mL",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "125",
+        "dose_units": "mL",
+        "route": "IV",
+        "frequency": "continuous"
+      }
+    },
+    {
+      "order_id": "ondansetron",
+      "category": "medication",
+      "display": "Ondansetron 4 mg IV",
+      "code": "1734340",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mg",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "4",
+        "dose_units": "mg",
+        "route": "IV",
+        "frequency": "q8h"
+      }
+    },
+    {
+      "order_id": "glucose-q1",
+      "category": "nursing",
+      "display": "Point-of-care glucose q1h",
+      "code": "33747003",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false,
+          "hint": "Parameters stated by the clinician"
+        }
+      ],
+      "defaults": {}
+    },
+    {
+      "order_id": "io",
+      "category": "nursing",
+      "display": "Strict intake and output",
+      "code": "410438003",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false,
+          "hint": "Parameters stated by the clinician"
+        }
+      ],
+      "defaults": {}
+    },
+    {
+      "order_id": "neuro",
+      "category": "nursing",
+      "display": "Neuro checks q2h",
+      "code": "225398001",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false,
+          "hint": "Parameters stated by the clinician"
+        }
+      ],
+      "defaults": {}
+    },
+    {
+      "order_id": "diet",
+      "category": "diet",
+      "display": "Diet order",
+      "code": "182922004",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "diet_type",
+          "label": "Diet type",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "regular",
+            "cardiac",
+            "carbohydrate-modified",
+            "2g sodium",
+            "NPO",
+            "clear liquids",
+            "full liquids"
+          ]
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "defaults": {
+        "diet_type": "NPO"
+      }
+    },
+    {
+      "order_id": "endo",
+      "category": "consult",
+      "display": "Endocrinology consult",
+      "code": "183523004",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "question",
+          "label": "Consult question",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "defaults": {
+        "priority": "urgent"
+      }
+    }
+  ]
+}

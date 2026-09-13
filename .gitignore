@@ -5,3 +5,6 @@ __pycache__/
 audit.db
 .env
 .epicSandboxSecrets
+.downtime-inbox/
+downtime.db
+*.db-journal

@@ -1,0 +1,943 @@
+{
+  "template_id": "ed-cap-admission",
+  "name": "ED Community-Acquired Pneumonia - Admission",
+  "setting": "ED",
+  "description": "Emergency department workup and admission orders for community-acquired pneumonia, including CURB-65-guided antibiotics and oxygen support.",
+  "indications": [
+    "community-acquired pneumonia",
+    "pneumonia",
+    "lower respiratory tract infection",
+    "consolidation on chest x-ray"
+  ],
+  "keywords": [
+    "pneumonia",
+    "cough",
+    "productive cough",
+    "sputum",
+    "consolidation",
+    "crackles",
+    "rales",
+    "chest x-ray",
+    "shortness of breath",
+    "fever",
+    "hypoxia",
+    "ceftriaxone",
+    "azithromycin",
+    "curb-65"
+  ],
+  "patient_fields": [
+    {
+      "field_id": "patient_name",
+      "label": "Patient name",
+      "kind": "text",
+      "required": true,
+      "hint": "Full name as stated in the encounter"
+    },
+    {
+      "field_id": "dob",
+      "label": "Date of birth",
+      "kind": "date",
+      "required": true,
+      "hint": "YYYY-MM-DD; if only an age is stated leave blank and note the age in chief complaint"
+    },
+    {
+      "field_id": "sex",
+      "label": "Sex",
+      "kind": "choice",
+      "required": true,
+      "choices": [
+        "male",
+        "female",
+        "other",
+        "unknown"
+      ]
+    },
+    {
+      "field_id": "mrn",
+      "label": "MRN",
+      "kind": "text",
+      "required": false,
+      "hint": "Only if an MRN or armband number is spoken; otherwise leave blank (a downtime temp ID is assigned)"
+    },
+    {
+      "field_id": "weight_kg",
+      "label": "Weight",
+      "kind": "number",
+      "required": false,
+      "unit": "kg",
+      "hint": "Convert pounds to kg if needed"
+    },
+    {
+      "field_id": "allergies",
+      "label": "Allergies",
+      "kind": "text",
+      "required": true,
+      "hint": "Comma-separated; write NKDA if explicitly denied"
+    },
+    {
+      "field_id": "ordering_provider",
+      "label": "Ordering provider",
+      "kind": "text",
+      "required": true,
+      "hint": "Clinician who states the plan"
+    },
+    {
+      "field_id": "encounter_location",
+      "label": "Encounter location",
+      "kind": "text",
+      "required": true,
+      "hint": "Unit / room / clinic named in the encounter"
+    },
+    {
+      "field_id": "chief_complaint",
+      "label": "Chief complaint",
+      "kind": "text",
+      "required": true
+    }
+  ],
+  "orders": [
+    {
+      "order_id": "cbc",
+      "category": "lab",
+      "display": "CBC with differential",
+      "code": "57021-8",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT",
+        "indication": "pneumonia"
+      }
+    },
+    {
+      "order_id": "cmp",
+      "category": "lab",
+      "display": "Comprehensive metabolic panel",
+      "code": "24323-8",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT"
+      }
+    },
+    {
+      "order_id": "lactate",
+      "category": "lab",
+      "display": "Lactate, plasma",
+      "code": "32693-4",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT"
+      }
+    },
+    {
+      "order_id": "bcx",
+      "category": "lab",
+      "display": "Blood culture x2 sets",
+      "code": "600-7",
+      "code_system": "http://loinc.org",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT",
+        "indication": "pneumonia, before antibiotics"
+      }
+    },
+    {
+      "order_id": "sputum-cx",
+      "category": "lab",
+      "display": "Sputum culture and Gram stain",
+      "code": "624-7",
+      "code_system": "http://loinc.org",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT"
+      }
+    },
+    {
+      "order_id": "strep-urine-ag",
+      "category": "lab",
+      "display": "Streptococcus pneumoniae urinary antigen",
+      "code": "43305-2",
+      "code_system": "http://loinc.org",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine"
+      }
+    },
+    {
+      "order_id": "resp-panel",
+      "category": "lab",
+      "display": "Respiratory viral panel PCR",
+      "code": "92141-1",
+      "code_system": "http://loinc.org",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "specimen_notes",
+          "label": "Specimen notes",
+          "kind": "text",
+          "required": false,
+          "hint": "Collection instructions if stated (e.g. before antibiotics, two sets)"
+        }
+      ],
+      "defaults": {
+        "priority": "routine"
+      }
+    },
+    {
+      "order_id": "cxr",
+      "category": "imaging",
+      "display": "Chest X-ray, 2 views",
+      "code": "71046",
+      "code_system": "http://www.ama-assn.org/go/cpt",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "contrast",
+          "label": "Contrast",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "none",
+            "IV",
+            "oral",
+            "IV and oral"
+          ]
+        },
+        {
+          "field_id": "requested_datetime",
+          "label": "Requested date/time",
+          "kind": "text",
+          "required": false,
+          "hint": "If a timing is stated, e.g. 'now', 'in the morning'"
+        }
+      ],
+      "defaults": {
+        "priority": "STAT",
+        "contrast": "none"
+      }
+    },
+    {
+      "order_id": "ceftriaxone",
+      "category": "medication",
+      "display": "Ceftriaxone 1 g IV",
+      "code": "1665005",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "g",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "1",
+        "dose_units": "g",
+        "route": "IV",
+        "frequency": "daily"
+      }
+    },
+    {
+      "order_id": "azithromycin",
+      "category": "medication",
+      "display": "Azithromycin 500 mg IV",
+      "code": "1665088",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mg",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "500",
+        "dose_units": "mg",
+        "route": "IV",
+        "frequency": "daily",
+        "duration": "5 days"
+      }
+    },
+    {
+      "order_id": "acetaminophen",
+      "category": "medication",
+      "display": "Acetaminophen 650 mg PO",
+      "code": "313782",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mg",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "650",
+        "dose_units": "mg",
+        "route": "PO",
+        "frequency": "q6h"
+      }
+    },
+    {
+      "order_id": "ns-maintenance",
+      "category": "medication",
+      "display": "Normal saline maintenance infusion",
+      "code": "1807632",
+      "code_system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "dose",
+          "label": "Dose",
+          "kind": "number",
+          "required": true,
+          "unit": "mL",
+          "hint": "Numeric amount only; quote the transcript"
+        },
+        {
+          "field_id": "dose_units",
+          "label": "Dose units",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "mg",
+            "g",
+            "mcg",
+            "units",
+            "mL",
+            "mEq"
+          ]
+        },
+        {
+          "field_id": "route",
+          "label": "Route",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "IV",
+            "PO",
+            "IM",
+            "SC",
+            "PR",
+            "inhaled",
+            "topical"
+          ]
+        },
+        {
+          "field_id": "frequency",
+          "label": "Frequency",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "once",
+            "q4h",
+            "q6h",
+            "q8h",
+            "q12h",
+            "daily",
+            "BID",
+            "TID",
+            "continuous",
+            "PRN"
+          ]
+        },
+        {
+          "field_id": "duration",
+          "label": "Duration",
+          "kind": "text",
+          "required": false,
+          "hint": "e.g. 5 days, until reassessed"
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        }
+      ],
+      "defaults": {
+        "dose": "75",
+        "dose_units": "mL",
+        "route": "IV",
+        "frequency": "continuous"
+      }
+    },
+    {
+      "order_id": "o2",
+      "category": "nursing",
+      "display": "Oxygen therapy - titrate to SpO2 > 92%",
+      "code": "57485005",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false,
+          "hint": "Parameters stated by the clinician"
+        },
+        {
+          "field_id": "target_spo2",
+          "label": "Target SpO2",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "defaults": {}
+    },
+    {
+      "order_id": "vitals-q4",
+      "category": "nursing",
+      "display": "Vital signs q4h",
+      "code": "422979000",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false,
+          "hint": "Parameters stated by the clinician"
+        }
+      ],
+      "defaults": {}
+    },
+    {
+      "order_id": "io",
+      "category": "nursing",
+      "display": "Strict intake and output",
+      "code": "410438003",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false,
+          "hint": "Parameters stated by the clinician"
+        }
+      ],
+      "defaults": {}
+    },
+    {
+      "order_id": "diet",
+      "category": "diet",
+      "display": "Diet order",
+      "code": "182922004",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "diet_type",
+          "label": "Diet type",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "regular",
+            "cardiac",
+            "carbohydrate-modified",
+            "2g sodium",
+            "NPO",
+            "clear liquids",
+            "full liquids"
+          ]
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "defaults": {
+        "diet_type": "regular"
+      }
+    },
+    {
+      "order_id": "activity",
+      "category": "activity",
+      "display": "Activity order",
+      "code": "304510005",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": true,
+      "fields": [
+        {
+          "field_id": "activity_level",
+          "label": "Activity level",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "bed rest",
+            "up with assistance",
+            "as tolerated",
+            "ambulate TID"
+          ]
+        },
+        {
+          "field_id": "detail",
+          "label": "Detail",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "defaults": {
+        "activity_level": "as tolerated"
+      }
+    },
+    {
+      "order_id": "pulm",
+      "category": "consult",
+      "display": "Pulmonary consult",
+      "code": "183523004",
+      "code_system": "http://snomed.info/sct",
+      "default_selected": false,
+      "fields": [
+        {
+          "field_id": "priority",
+          "label": "Priority",
+          "kind": "choice",
+          "required": true,
+          "choices": [
+            "STAT",
+            "urgent",
+            "routine"
+          ]
+        },
+        {
+          "field_id": "indication",
+          "label": "Indication",
+          "kind": "text",
+          "required": true,
+          "hint": "Clinical reason stated for this order"
+        },
+        {
+          "field_id": "question",
+          "label": "Consult question",
+          "kind": "text",
+          "required": false
+        }
+      ],
+      "defaults": {
+        "priority": "urgent"
+      }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+[Ambient capture — Emergency Department, ED Bay 4 — EHR DOWNTIME IN EFFECT]
+
+NURSE: Dr. Alvarez, this is Mr. Harold Bennett in ED Bay 4. Date of birth is 1952-03-14, male. He weighs 82 kg. Temp 38.9, heart rate 108, blood pressure 128 over 74, respiratory rate 26, and his sat is 89 percent on room air.
+
+DR. ALVAREZ: Thanks. Mr. Bennett, tell me what's been going on.
+
+PATIENT: I've had this cough for about five days. It started dry but now I'm bringing up thick green stuff. Last night I got the shakes, couldn't stop shivering, and this morning I couldn't walk to the bathroom without getting winded.
+
+DR. ALVAREZ: Any chest pain with the cough?
+
+PATIENT: Sharp on the right side when I take a deep breath. Not pressure, more like a stitch.
+
+DR. ALVAREZ: Any fever at home?
+
+PATIENT: My wife took it at 102 last night.
+
+DR. ALVAREZ: Do you have any allergies to medications?
+
+PATIENT: I'm allergic to sulfa drugs. Gives me a rash all over.
+
+DR. ALVAREZ: Good to know. Any lung problems before this?
+
+PATIENT: I smoked for thirty years, quit in 2010. No inhalers or anything.
+
+DR. ALVAREZ: Let me listen. Deep breaths for me. [pause] I hear crackles at the right base, and there's egophony there too. Heart is regular, no murmur. Belly soft. No leg swelling.
+
+DR. ALVAREZ: Mr. Bennett, this sounds like pneumonia — a community-acquired pneumonia in the right lower lobe. Your oxygen is low enough that I want to admit you rather than send you home on pills.
+
+PATIENT: Whatever you think, doc.
+
+DR. ALVAREZ: Okay. Nurse, let's get him on oxygen by nasal cannula, titrate to keep the sat above 92 percent. I want a chest X-ray, two views, STAT. Draw a CBC with differential, a comprehensive metabolic panel, and a lactate. Get two sets of blood cultures, and please draw those before the antibiotics go in.
+
+NURSE: Blood cultures before antibiotics, understood.
+
+DR. ALVAREZ: For antibiotics — ceftriaxone 1 gram IV daily, and azithromycin 500 mg IV daily for five days. He's sulfa-allergic, not cephalosporin-allergic, so ceftriaxone is fine.
+
+NURSE: Ceftriaxone 1 gram IV daily and azithromycin 500 mg IV daily.
+
+DR. ALVAREZ: Correct. Vital signs every four hours. He can eat a regular diet, activity as tolerated. I don't need a pulmonary consult at this point.
+
+NURSE: What about a sputum culture?
+
+DR. ALVAREZ: He's producing plenty, so yes, send a sputum culture with Gram stain, routine priority.
+
+DR. ALVAREZ: Mr. Bennett, the computer system is down right now so I'm dictating these orders into our downtime tool. The nursing team has everything in hand. I'll come back after the X-ray.
+
+PATIENT: Thank you.
+
+NURSE: Dr. Alvarez, do you want a respiratory viral panel?
+
+DR. ALVAREZ: Not right now. Let's start with the chest film and cultures.
+
+[End of capture]
