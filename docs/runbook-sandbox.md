@@ -1,5 +1,8 @@
 # Sandbox Runbook
 
+> For a fully-offline, no-API-key demo of both the online and downtime scenarios, see
+> `docs/runbook-demo.md` instead.
+
 Practical steps to run EpicVibe end-to-end at each stage of the rollout path (see design
 spec §11): local smoke test, the public CDS Hooks Sandbox, an Epic FHIR sandbox for
 payload-shape validation, and the customer's non-production Epic environment.
