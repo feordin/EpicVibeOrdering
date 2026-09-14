@@ -1,0 +1,5 @@
+Nurse: Doctor Alvarez, this is Mister Harold Bennett in E D Bay 4. Date of birth is March 14th, 1952, male. He weighs 82 kilograms. Temp 38.9, heart rate 108, blood pressure 128 over 74, respiratory rate 26, and his sat is 89 percent on room air.
+Doctor Alvarez: Mister Bennett, this sounds like pneumonia, a community acquired pneumonia in the right lower lobe. Your oxygen is low enough that I want to admit you rather than send you home on pills.
+Doctor Alvarez: Nurse, let's get him on oxygen by nasal cannula, titrate to keep the sat above 92 percent. I want a chest X-ray, two views, stat. Draw a C B C with differential, a comprehensive metabolic panel, and a lactate. Get two sets of blood cultures, and please draw those before the antibiotics go in.
+Doctor Alvarez: For antibiotics, ceftriaxone 1 gram I V daily, and azithromycin 500 milligrams I V daily for five days. He is sulfa allergic, not cephalosporin allergic, so ceftriaxone is fine.
+Doctor Alvarez: Vital signs every four hours. He can eat a regular diet, activity as tolerated. Send a sputum culture with gram stain, routine priority.
