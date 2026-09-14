@@ -52,7 +52,7 @@ class TranscribeSettings(BaseSettings):
     )
 
     enabled: bool = True
-    model: str = "small"
+    model: str = "medium"
     #: Pre-seeded weights for an air-gapped box. When set, faster-whisper is
     #: pointed at this directory and never reaches for Hugging Face.
     model_dir: Path | None = None

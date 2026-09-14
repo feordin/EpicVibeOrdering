@@ -396,27 +396,47 @@ Settings live in `src/epicvibe/downtime/transcribe.py` under prefix
 | Var | Default | Notes |
 |---|---|---|
 | `ENABLED` | `true` | Set false to hide the controls and return `501`. |
-| `MODEL` | `small` | Any faster-whisper model id, or a path to converted weights. |
+| `MODEL` | `medium` | Any faster-whisper model id, or a path to converted weights. Set to `small` or `tiny.en` for a faster, lower-accuracy transcription on a slower box. |
 | `MODEL_DIR` | unset | Pre-seeded weights directory — see offline note below. |
 | `LANGUAGE` | `en` | Skips language detection. |
 | `BEAM_SIZE` | `1` | Greedy; raise for accuracy at a CPU cost. |
 | `VAD_FILTER` | `true` | Drops silence before decoding. |
 
-**Weights and truly-offline boxes.** On first use the `small` model (~480 MB, int8
+**Weights and truly-offline boxes.** On first use the `medium` model (~1.5 GB, int8
 CTranslate2) downloads from Hugging Face into
-`~/.cache/huggingface/hub/models--Systran--faster-whisper-small`
+`~/.cache/huggingface/hub/models--Systran--faster-whisper-medium`
 (`%USERPROFILE%\.cache\huggingface\hub\...` on Windows). That is the only network
 call in the whole feature, and it never happens again. For a machine that will never
 have internet, copy that model directory onto the box and point
 `EPICVIBE_DOWNTIME_WHISPER_MODEL_DIR` at it: if the directory contains `model.bin` it is
 used as the model itself, otherwise it is used as the download root. `GET
-/api/transcribe/status` reports `model_cached` so you can confirm before the demo.
+/api/transcribe/status` reports `model_cached` so you can confirm before the demo. Set
+`EPICVIBE_DOWNTIME_WHISPER_MODEL=small` (or `tiny.en`) to trade accuracy for speed on a
+slower box — see the measured comparison below.
 
-Measured on this CPU: the 82-second sample transcribes in **~12-15 s** (roughly 6x
-realtime) with `small`/int8/beam 1. Quality on synthesized speech is good enough for the
-keyword extractor — "pneumonia", "azithromycin", "chest x-ray", "sputum" and the patient
-name all come through, and `/api/generate` still selects `ed-cap-admission`. Drug names
-are the weak spot: *ceftriaxone* comes back as "seftriaxone". That is exactly why the
+<!-- RUNBOOK_WHISPER_BENCHMARK_START -->
+Measured on this CPU (`faster-whisper`, CPU int8, `beam_size=1`, `vad_filter=true` —
+the same settings `Transcriber` uses), on the 82-second sample
+`fixtures/downtime/audio/ed-cap-admission-excerpt.wav`. WER is a rough word-level edit
+distance against `fixtures/downtime/audio/ed-cap-admission-excerpt.txt`; word checks are
+case-insensitive substring matches against the transcribed text.
+
+| Model | Load (s) | Transcribe (s) | WER | ceftriaxone | azithromycin | Bennett | NURSE | room air | titrate | CBC |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `small` | 1.7 | 6.3 | 0.143 | miss (`seftriaxone`) | OK | OK | miss (`NERS`) | miss (`Rumaeur`) | miss (`tight rate`) | OK |
+| `medium` | 17.9 | 16.5 | 0.117 | OK | OK | OK | miss (`NURS`) | OK | OK | OK |
+
+`small` mangles the two drug names and drops "room air" / "titrate" entirely; `medium`
+gets every drug and clinical term right except the capitalized "NURSE" speaker label
+(transcribed as "NURS"/"NERS" either way — a capitalization/ASR-of-a-fragment artifact,
+not a missed word). `medium` costs roughly 2.6x the transcribe time of `small` for a
+lower WER and the recognitions that matter for order generation, which is why it is now
+the default; set `EPICVIBE_DOWNTIME_WHISPER_MODEL=small` to trade that back for speed.
+<!-- RUNBOOK_WHISPER_BENCHMARK_END -->
+
+Quality on synthesized speech is good enough for the keyword extractor —
+"pneumonia", "azithromycin", "chest x-ray", "sputum" and the patient name all come
+through, and `/api/generate` still selects `ed-cap-admission`. That is exactly why the
 filled order set is reviewed and signed by a human before anything becomes HL7.
 
 ### Settings (`src/epicvibe/downtime/config.py`, prefix `EPICVIBE_DOWNTIME_`)

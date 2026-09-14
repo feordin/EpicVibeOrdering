@@ -82,7 +82,7 @@ def _client(tmp_path, transcriber, audio_dir=AUDIO_DIR) -> TestClient:
 def test_settings_defaults_and_env_prefix(monkeypatch):
     s = tr.TranscribeSettings()
     assert (s.model, s.language, s.enabled, s.beam_size, s.vad_filter) == (
-        "small", "en", True, 1, True)
+        "medium", "en", True, 1, True)
     assert s.model_dir is None
 
     monkeypatch.setenv("EPICVIBE_DOWNTIME_WHISPER_MODEL", "tiny.en")
