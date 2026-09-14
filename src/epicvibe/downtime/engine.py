@@ -62,8 +62,10 @@ Rules:
    Explicitly DESELECT a default order the clinician defers ("hold the...", "no troponin for now").
    Give a one-line rationale for every order, selected or not.
 5. Order fields (dose, route, frequency, duration, priority, indication, specimen notes): fill
-   from the transcript first; fall back to the template `defaults` only when the transcript is
-   silent, and in that case leave `evidence` null and confidence low.
+   ONLY from the transcript. Do NOT copy the template `defaults` into your answer - the template
+   defaults are applied automatically after you respond, and they are labelled as defaults so the
+   clinician can see which values they did not state. A field you cannot support with a quote
+   must be left null; guessing it hides the fact that nobody said it.
 6. Use only field_ids and order_ids present in the template spec.
 7. List anything clinically important that you could not resolve in `unresolved`, and any
    ambiguity or apparent contradiction in `warnings`."""
@@ -132,7 +134,7 @@ class DowntimeEngine:
         )
         raw.setdefault("template_id", template.template_id)
         filled = FilledTemplate.model_validate(raw)
-        return validate_filled(filled, template)
+        return validate_filled(filled, template, transcript=transcript)
 
 
 # ---------------------------------------------------------------------------
@@ -140,8 +142,17 @@ class DowntimeEngine:
 # ---------------------------------------------------------------------------
 
 
-def validate_filled(filled: FilledTemplate, template: OrderTemplate) -> FilledTemplate:
-    """Reconcile a model-produced fill against the template it claims to fill."""
+def validate_filled(
+    filled: FilledTemplate, template: OrderTemplate, transcript: str | None = None
+) -> FilledTemplate:
+    """Reconcile a model-produced fill against the template it claims to fill.
+
+    Provider-agnostic: the keyword fake, Ollama and Anthropic paths all land
+    here, so field provenance (`source`) and the template defaults are applied
+    in exactly one place. When `transcript` is given, every quote the model
+    offered is checked against it - a value whose quote is not actually in the
+    transcript is kept (blanking it would hide the problem) but warned about.
+    """
     warnings = list(filled.warnings)
     if filled.template_id != template.template_id:
         warnings.append(
@@ -210,6 +221,24 @@ def validate_filled(filled: FilledTemplate, template: OrderTemplate) -> FilledTe
                     for f in spec.fields],
         ))
         for spec in template.orders
+    ]
+
+    # -- provenance ---------------------------------------------------------
+    # Every field now exists exactly once, in template order, so this is the one
+    # place that decides where a value came from. Patient fields never take a
+    # default: there is no guideline-sanctioned guess for someone's name.
+    norm_transcript = _normalize(transcript) if transcript is not None else None
+    patient_fields = [
+        _provenance(f, None, norm_transcript, warnings, f.field_id)
+        for f in patient_fields
+    ]
+    orders = [
+        order.model_copy(update={"fields": [
+            _provenance(f, known_orders[order.order_id].defaults, norm_transcript,
+                        warnings, f"{order.order_id}.{f.field_id}")
+            for f in order.fields
+        ]})
+        for order in orders
     ]
 
     unresolved = [u for u in filled.unresolved if u]
@@ -284,3 +313,49 @@ def _coerce(
             value = match
 
     return field.model_copy(update={"value": value})
+
+
+def _normalize(text: str) -> str:
+    """Collapse whitespace and case so a quote can be matched forgivingly.
+
+    Whisper and the models disagree about punctuation and line breaks far more
+    often than they disagree about words, and we do not want a comma to make an
+    honest quote look fabricated.
+    """
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def _provenance(
+    field: FilledField,
+    defaults: dict[str, str] | None,
+    norm_transcript: str | None,
+    warnings: list[str],
+    where: str,
+) -> FilledField:
+    """Stamp `source` on one field and apply the template default if it is blank."""
+    value = field.value
+    evidence = (field.evidence or "").strip()
+
+    if value and evidence:
+        if norm_transcript is not None and _normalize(evidence) not in norm_transcript:
+            # Keep the value: the clinician has to see what the model produced in
+            # order to reject it. Silently dropping it would look like a gap.
+            warnings.append(f"evidence not found verbatim for {where}: {evidence!r}")
+        return field.model_copy(update={"source": "transcript"})
+
+    default = (defaults or {}).get(field.field_id)
+    if default:
+        if not value:
+            return field.model_copy(update={
+                "value": default, "evidence": None, "source": "default", "confidence": "low",
+            })
+        # A provider that applied the default itself (the keyword extractor does)
+        # still has to end up labelled as a default, not as something unattributed.
+        if not evidence and str(value).strip().lower() == default.strip().lower():
+            return field.model_copy(update={
+                "value": default, "evidence": None, "source": "default", "confidence": "low",
+            })
+
+    # A value with no quote is not transcript-backed and did not come from the
+    # template either; it stays visible but unattributed.
+    return field.model_copy(update={"source": "none"})

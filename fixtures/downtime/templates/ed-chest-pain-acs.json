@@ -24,6 +24,12 @@
     "nitroglycerin",
     "crushing"
   ],
+  "guideline": {
+    "name": "Guideline for the Evaluation and Diagnosis of Chest Pain",
+    "organization": "ACC/AHA",
+    "year": 2021,
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001029"
+  },
   "patient_fields": [
     {
       "field_id": "patient_name",
@@ -132,7 +138,8 @@
       "defaults": {
         "priority": "STAT",
         "indication": "chest pain, ACS rule-out"
-      }
+      },
+      "guideline_note": "ACC/AHA 2021 chest pain: high-sensitivity cardiac troponin is the preferred standard, drawn on a serial protocol."
     },
     {
       "order_id": "trop-3",
@@ -170,7 +177,8 @@
       ],
       "defaults": {
         "priority": "STAT"
-      }
+      },
+      "guideline_note": "ACC/AHA 2021 chest pain: serial hs-cTn sampling drives the rule-out pathway."
     },
     {
       "order_id": "cbc",
@@ -360,7 +368,8 @@
       ],
       "defaults": {
         "priority": "STAT"
-      }
+      },
+      "guideline_note": "ACC/AHA 2021 chest pain: D-dimer only after a pretest-probability assessment for PE, not reflexively."
     },
     {
       "order_id": "ecg",
@@ -411,7 +420,8 @@
       "defaults": {
         "priority": "STAT",
         "contrast": "none"
-      }
+      },
+      "guideline_note": "ACC/AHA 2021 chest pain: 12-lead ECG within 10 minutes of arrival for acute chest pain."
     },
     {
       "order_id": "cxr",
@@ -547,7 +557,8 @@
         "dose_units": "mg",
         "route": "PO",
         "frequency": "once"
-      }
+      },
+      "guideline_note": "ACC/AHA 2021 chest pain: aspirin for suspected ACS unless contraindicated."
     },
     {
       "order_id": "nitroglycerin-sl",
@@ -1039,7 +1050,8 @@
       ],
       "defaults": {
         "priority": "urgent"
-      }
+      },
+      "guideline_note": "ACC/AHA 2021 chest pain: cardiology involvement for an abnormal troponin or a high-risk pathway."
     }
   ]
 }

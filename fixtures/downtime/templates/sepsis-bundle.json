@@ -26,6 +26,12 @@
     "norepinephrine",
     "qsofa"
   ],
+  "guideline": {
+    "name": "Surviving Sepsis Campaign: International Guidelines for Management of Sepsis and Septic Shock",
+    "organization": "SCCM/ESICM",
+    "year": 2021,
+    "url": "https://www.sccm.org/survivingsepsiscampaign/guidelines/adult-patients"
+  },
   "patient_fields": [
     {
       "field_id": "patient_name",
@@ -134,7 +140,8 @@
       "defaults": {
         "priority": "STAT",
         "indication": "sepsis"
-      }
+      },
+      "guideline_note": "Surviving Sepsis Campaign 2021: measure lactate as part of the initial hour-1 bundle."
     },
     {
       "order_id": "lactate-repeat",
@@ -172,7 +179,8 @@
       ],
       "defaults": {
         "priority": "STAT"
-      }
+      },
+      "guideline_note": "Surviving Sepsis Campaign 2021: re-measure lactate within 2-4 hours if the initial value is elevated."
     },
     {
       "order_id": "bcx",
@@ -211,7 +219,8 @@
       "defaults": {
         "priority": "STAT",
         "indication": "sepsis, before antibiotics"
-      }
+      },
+      "guideline_note": "Surviving Sepsis Campaign 2021: blood cultures before antimicrobials, provided this causes no substantial delay."
     },
     {
       "order_id": "cbc",
@@ -575,7 +584,8 @@
         "dose_units": "mL",
         "route": "IV",
         "frequency": "once"
-      }
+      },
+      "guideline_note": "Surviving Sepsis Campaign 2021: begin crystalloid resuscitation for sepsis-induced hypoperfusion."
     },
     {
       "order_id": "vancomycin",
@@ -660,7 +670,8 @@
         "dose_units": "mg",
         "route": "IV",
         "frequency": "q12h"
-      }
+      },
+      "guideline_note": "Surviving Sepsis Campaign 2021: broad-spectrum antimicrobials immediately for septic shock; MRSA coverage where risk factors exist."
     },
     {
       "order_id": "pip-tazo",
@@ -745,7 +756,8 @@
         "dose_units": "g",
         "route": "IV",
         "frequency": "q6h"
-      }
+      },
+      "guideline_note": "Surviving Sepsis Campaign 2021: empiric broad-spectrum gram-negative coverage, started within the first hour of septic shock."
     },
     {
       "order_id": "cefepime",
@@ -830,7 +842,8 @@
         "dose_units": "g",
         "route": "IV",
         "frequency": "q8h"
-      }
+      },
+      "guideline_note": "Surviving Sepsis Campaign 2021: alternative empiric gram-negative agent where local antibiogram or allergy favours it."
     },
     {
       "order_id": "norepinephrine",
@@ -915,7 +928,8 @@
         "dose_units": "mcg",
         "route": "IV",
         "frequency": "continuous"
-      }
+      },
+      "guideline_note": "Surviving Sepsis Campaign 2021: norepinephrine is the first-line vasopressor, targeting MAP 65 mmHg."
     },
     {
       "order_id": "map",
@@ -940,7 +954,8 @@
           "hint": "Parameters stated by the clinician"
         }
       ],
-      "defaults": {}
+      "defaults": {},
+      "guideline_note": "Surviving Sepsis Campaign 2021: initial MAP target of 65 mmHg for adults on vasopressors."
     },
     {
       "order_id": "vitals-q15",
@@ -1061,7 +1076,8 @@
       ],
       "defaults": {
         "priority": "urgent"
-      }
+      },
+      "guideline_note": "Surviving Sepsis Campaign 2021: critical care involvement for septic shock."
     }
   ]
 }

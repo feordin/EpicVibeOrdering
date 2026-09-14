@@ -15,6 +15,7 @@ from fastapi.testclient import TestClient
 from epicvibe.downtime.app import create_app
 from epicvibe.downtime.config import DowntimeSettings
 from epicvibe.downtime.mock_engine import MockIntegrationEngine
+from epicvibe.downtime.offline import OfflineSettings
 
 REPO = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO / "fixtures" / "downtime" / "templates"
@@ -66,7 +67,9 @@ def settings(tmp_path):
 
 @pytest.fixture
 def client(settings):
-    with TestClient(create_app(settings)) as c:
+    # Strict offline mode is pinned off here so a developer's .env cannot turn
+    # every API test into a startup refusal.
+    with TestClient(create_app(settings, offline=OfflineSettings(strict=False))) as c:
         yield c
 
 
@@ -91,16 +94,26 @@ def test_index_serves_the_capture_page(client):
     assert "data-order=\"${esc(spec.order_id)}\"" in body
     assert "function orderById(" in body
     assert "transcript sent to hosted model" in body
+    # three provenance chips, plus the locality badge
+    assert 'f.source === "transcript"' in body
+    assert 'f.source === "default"' in body
+    assert "template default" in body and "not in transcript" in body
+    assert "LOCAL ONLY" in body and 'id="offline"' in body
+    # the guideline the template's defaults came from, under the template name
+    assert "Guideline:" in body and "template.guideline" in body
 
 
 def test_status(client):
     data = client.get("/api/status").json()
     assert data["provider"] == "fake"
-    assert data["model"] == "keyword-fake"
+    assert data["model"] == "fake:keyword"
     assert data["templates"] == 6
     assert data["counts"] == {}
     assert data["ehr_online"] is False          # the EHR is down; that is why we are here
     assert data["allow_phi_to_model"] is False
+    # The locality badge reads these three and nothing else.
+    assert set(data["offline"]) == {"strict", "all_local", "not_local"}
+    assert data["offline"]["strict"] is False
 
 
 def test_ehr_status_is_server_side_and_gates_submit_batch(client):
@@ -152,6 +165,26 @@ def test_generate_returns_selection_filled_and_template(client):
     filled = [f for f in data["filled"]["patient_fields"] if f["value"]]
     assert len(filled) >= 5
     assert any(f["evidence"] for f in filled)
+
+
+def test_generate_carries_field_provenance_and_the_guideline(client):
+    data = client.post("/api/generate", json={"transcript": transcript()}).json()
+    # The UI renders one of three chips per field, so every field must say which.
+    every = data["filled"]["patient_fields"] + [
+        f for o in data["filled"]["orders"] for f in o["fields"]]
+    assert every
+    assert {f["source"] for f in every} <= {"transcript", "default", "none"}
+    for f in every:
+        if f["source"] == "transcript":
+            assert f["evidence"]
+        if f["source"] == "default":
+            assert f["value"] and not f["evidence"]
+    # Defaults do get applied somewhere in a real fill.
+    assert any(f["source"] == "default" for f in every)
+    # Guideline provenance travels with the template for the header + chip titles.
+    g = data["template"]["guideline"]
+    assert g["organization"] == "IDSA/ATS" and g["year"] == 2019
+    assert any(o.get("guideline_note") for o in data["template"]["orders"])
 
 
 def test_generate_with_a_pinned_template(client):

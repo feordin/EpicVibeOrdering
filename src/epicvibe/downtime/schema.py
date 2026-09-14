@@ -11,6 +11,12 @@ from pydantic import BaseModel, ConfigDict
 
 Confidence = Literal["high", "medium", "low"]
 
+#: Where a filled value came from. The clinician signing the order needs to see
+#: this at a glance: `transcript` is something the clinician said (and the quote
+#: is in `evidence`), `default` is a guideline-derived value baked into the
+#: template by a human, `none` is a gap. Only `transcript` is model output.
+FieldSource = Literal["transcript", "default", "none"]
+
 
 class _Strict(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -33,6 +39,9 @@ class FilledField(_Strict):
     value: str | None = None
     evidence: str | None = None
     confidence: Confidence = "low"
+    #: Set by post-validation, not by the model - see `engine.validate_filled`.
+    #: Anything the model puts here is overwritten.
+    source: FieldSource = "none"
 
 
 class FilledOrder(_Strict):

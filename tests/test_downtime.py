@@ -255,9 +255,119 @@ def test_validation_coerces_types_and_blanks_garbage(library):
     assert values["sex"] == "male"
     dose = next(f for o in out.orders if o.order_id == "ceftriaxone"
                 for f in o.fields if f.field_id == "dose")
-    assert dose.value is None
+    # The garbled dose is blanked (with a warning), then back-filled from the
+    # template default - so it shows as a default, never as something the
+    # clinician said.
     assert any("a handful" in w for w in out.warnings)
-    assert "ceftriaxone.dose" in out.unresolved
+    assert dose.value == "1"
+    assert dose.source == "default"
+    assert dose.evidence is None
+    assert "ceftriaxone.dose" not in out.unresolved
+    # A required order field with no default is still a gap.
+    assert "ceftriaxone.indication" in out.unresolved
+
+
+def test_every_template_cites_a_guideline(library):
+    for t in library:
+        assert t.guideline is not None, f"{t.template_id} has no guideline"
+        assert t.guideline.name and t.guideline.organization
+        assert 2015 <= (t.guideline.year or 0) <= 2026
+        assert t.guideline.label()
+        # At least the medication orders explain where their defaults come from.
+        noted = [o for o in t.orders if o.guideline_note]
+        assert noted, f"{t.template_id} has no guideline_note on any order"
+
+
+def test_templates_tolerate_unknown_keys():
+    t = OrderTemplate.model_validate({
+        "template_id": "x", "name": "X", "setting": "ED",
+        "guideline": {"name": "G", "organization": "O", "year": 2020, "surprise": 1},
+        "orders": [{"order_id": "o", "category": "lab", "display": "d", "code": "1",
+                    "code_system": "s", "guideline_note": "n", "unexpected": True}],
+        "future_field": "ignored",
+    })
+    assert t.guideline.name == "G"
+    assert t.orders[0].guideline_note == "n"
+
+
+def test_provenance_marks_transcript_default_and_gap(library):
+    template = library.get("ed-cap-admission")
+    text = "Mr. Alan Reyes is here. Give ceftriaxone two grams IV for the pneumonia."
+    raw = FilledTemplate(
+        template_id="ed-cap-admission",
+        patient_fields=[
+            FilledField(field_id="patient_name", value="Alan Reyes",
+                        evidence="Mr. Alan Reyes is here", confidence="high"),
+        ],
+        orders=[FilledOrder(order_id="ceftriaxone", selected=True, fields=[
+            FilledField(field_id="dose", value="2",
+                        evidence="ceftriaxone two grams IV", confidence="high"),
+        ])],
+    )
+    out = validate_filled(raw, template, transcript=text)
+
+    name = next(f for f in out.patient_fields if f.field_id == "patient_name")
+    assert name.source == "transcript"
+    # Patient fields never take a template default.
+    dob = next(f for f in out.patient_fields if f.field_id == "dob")
+    assert dob.value is None and dob.source == "none"
+
+    cef = next(o for o in out.orders if o.order_id == "ceftriaxone")
+    fields = {f.field_id: f for f in cef.fields}
+    assert fields["dose"].value == "2" and fields["dose"].source == "transcript"
+    # Silent fields fall back to the guideline-derived template defaults.
+    assert fields["route"].value == "IV" and fields["route"].source == "default"
+    assert fields["frequency"].value == "daily" and fields["frequency"].source == "default"
+    # No default, not stated: a gap the UI outlines in red.
+    assert fields["duration"].value is None and fields["duration"].source == "none"
+    assert not out.warnings
+
+
+def test_provenance_warns_when_a_quote_is_not_in_the_transcript(library):
+    template = library.get("ed-cap-admission")
+    raw = FilledTemplate(
+        template_id="ed-cap-admission",
+        patient_fields=[FilledField(field_id="patient_name", value="Alan Reyes",
+                                    evidence="the patient Alan Reyes, MRN 12345",
+                                    confidence="high")],
+    )
+    out = validate_filled(raw, template, transcript="Mr. Reyes is short of breath.")
+    name = next(f for f in out.patient_fields if f.field_id == "patient_name")
+    # The value survives so the clinician can reject it; the warning is the point.
+    assert name.value == "Alan Reyes"
+    assert name.source == "transcript"
+    assert any("evidence not found verbatim" in w for w in out.warnings)
+
+
+def test_provenance_quote_matching_ignores_case_and_whitespace(library):
+    template = library.get("ed-cap-admission")
+    raw = FilledTemplate(
+        template_id="ed-cap-admission",
+        patient_fields=[FilledField(field_id="patient_name", value="Alan Reyes",
+                                    evidence="  ALAN   Reyes\nis here ", confidence="high")],
+    )
+    out = validate_filled(raw, template, transcript="Mr. Alan Reyes\n  is here today.")
+    assert not any("verbatim" in w for w in out.warnings)
+
+
+async def test_keyword_provider_values_carry_a_source(engine):
+    result = await engine.generate(transcript("ed-cap-admission"))
+    for f in result.filled.patient_fields:
+        assert f.source in ("transcript", "none")
+        assert (f.source == "transcript") == bool(f.value and f.evidence)
+    template = engine.library.get("ed-cap-admission")
+    # The keyword provider applies some defaults itself; validation still has to
+    # end up labelling them as defaults rather than as unattributed values.
+    seen = set()
+    for order in result.filled.orders:
+        defaults = template.order(order.order_id).defaults
+        for f in order.fields:
+            seen.add(f.source)
+            if f.source == "default":
+                assert f.value == defaults[f.field_id] and f.evidence is None
+            elif f.source == "transcript":
+                assert f.value and f.evidence
+    assert "default" in seen and "transcript" in seen
 
 
 def test_validation_forces_the_template_id(library):

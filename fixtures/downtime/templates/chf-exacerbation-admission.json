@@ -26,6 +26,12 @@
     "echocardiogram",
     "ejection fraction"
   ],
+  "guideline": {
+    "name": "Guideline for the Management of Heart Failure",
+    "organization": "ACC/AHA/HFSA",
+    "year": 2022,
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001063"
+  },
   "patient_fields": [
     {
       "field_id": "patient_name",
@@ -134,7 +140,8 @@
       "defaults": {
         "priority": "STAT",
         "indication": "heart failure exacerbation"
-      }
+      },
+      "guideline_note": "ACC/AHA/HFSA 2022 heart failure: natriuretic peptides to support the diagnosis and to risk-stratify."
     },
     {
       "order_id": "bmp-daily",
@@ -172,7 +179,8 @@
       ],
       "defaults": {
         "priority": "STAT"
-      }
+      },
+      "guideline_note": "ACC/AHA/HFSA 2022 heart failure: monitor renal function and electrolytes during diuresis."
     },
     {
       "order_id": "cbc",
@@ -426,7 +434,8 @@
       "defaults": {
         "priority": "urgent",
         "contrast": "none"
-      }
+      },
+      "guideline_note": "ACC/AHA/HFSA 2022 heart failure: assess ejection fraction and structure when it is unknown or has changed."
     },
     {
       "order_id": "ecg",
@@ -562,7 +571,8 @@
         "dose_units": "mg",
         "route": "IV",
         "frequency": "BID"
-      }
+      },
+      "guideline_note": "ACC/AHA/HFSA 2022 heart failure: IV loop diuretic for the congested patient admitted with decompensation."
     },
     {
       "order_id": "metolazone",
@@ -647,7 +657,8 @@
         "dose_units": "mg",
         "route": "PO",
         "frequency": "daily"
-      }
+      },
+      "guideline_note": "ACC/AHA/HFSA 2022 heart failure: add a thiazide-type diuretic for diuretic resistance."
     },
     {
       "order_id": "kcl-po",
@@ -817,7 +828,8 @@
         "dose_units": "mg",
         "route": "PO",
         "frequency": "BID"
-      }
+      },
+      "guideline_note": "ACC/AHA/HFSA 2022 heart failure: evidence-based beta blocker in HFrEF, continued or started once the patient is no longer congested."
     },
     {
       "order_id": "lisinopril",
@@ -902,7 +914,8 @@
         "dose_units": "mg",
         "route": "PO",
         "frequency": "daily"
-      }
+      },
+      "guideline_note": "ACC/AHA/HFSA 2022 heart failure: renin-angiotensin system inhibition is guideline-directed medical therapy for HFrEF."
     },
     {
       "order_id": "daily-weights",
@@ -927,7 +940,8 @@
           "hint": "Parameters stated by the clinician"
         }
       ],
-      "defaults": {}
+      "defaults": {},
+      "guideline_note": "ACC/AHA/HFSA 2022 heart failure: track the response to decongestion with daily weights and strict I/O."
     },
     {
       "order_id": "io",
@@ -952,7 +966,8 @@
           "hint": "Parameters stated by the clinician"
         }
       ],
-      "defaults": {}
+      "defaults": {},
+      "guideline_note": "ACC/AHA/HFSA 2022 heart failure: track the response to decongestion with daily weights and strict I/O."
     },
     {
       "order_id": "fluid-restriction",
@@ -1111,7 +1126,8 @@
       ],
       "defaults": {
         "priority": "urgent"
-      }
+      },
+      "guideline_note": "ACC/AHA/HFSA 2022 heart failure: specialist involvement for advanced or refractory heart failure."
     }
   ]
 }

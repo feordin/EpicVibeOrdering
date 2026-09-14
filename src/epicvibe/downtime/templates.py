@@ -22,6 +22,23 @@ class _Tolerant(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+class Guideline(_Tolerant):
+    """The published guideline a template's content is derived from.
+
+    Purely provenance for the clinician: it is what lets the UI say "this value
+    came from the IDSA/ATS 2019 CAP order set", not from a model.
+    """
+
+    name: str
+    organization: str = ""
+    year: int | None = None
+    url: str | None = None
+
+    def label(self) -> str:
+        bits = [b for b in (self.organization, str(self.year) if self.year else "") if b]
+        return f"{' '.join(bits)} {self.name}".strip() if bits else self.name
+
+
 class TemplateField(_Tolerant):
     field_id: str
     label: str
@@ -41,6 +58,10 @@ class TemplateOrder(_Tolerant):
     default_selected: bool = False
     fields: list[TemplateField] = []
     defaults: dict[str, str] = {}
+    #: Why this order's defaults look the way they do, in one line. Shown on the
+    #: "template default" chip so the clinician can see the provenance of a value
+    #: they did not say out loud.
+    guideline_note: str = ""
 
 
 class OrderTemplate(_Tolerant):
@@ -50,6 +71,7 @@ class OrderTemplate(_Tolerant):
     description: str = ""
     indications: list[str] = []
     keywords: list[str] = []
+    guideline: Guideline | None = None
     patient_fields: list[TemplateField] = []
     orders: list[TemplateOrder] = []
 

@@ -21,6 +21,12 @@
     "bicarbonate",
     "type 1 diabetes"
   ],
+  "guideline": {
+    "name": "Standards of Care in Diabetes - Hyperglycemic Crises in Adults",
+    "organization": "American Diabetes Association",
+    "year": 2025,
+    "url": "https://diabetesjournals.org/care/issue/48/Supplement_1"
+  },
   "patient_fields": [
     {
       "field_id": "patient_name",
@@ -129,7 +135,8 @@
       "defaults": {
         "priority": "STAT",
         "indication": "DKA"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025 (hyperglycemic crises): serial electrolytes and anion gap drive the DKA protocol."
     },
     {
       "order_id": "vbg",
@@ -205,7 +212,8 @@
       ],
       "defaults": {
         "priority": "STAT"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: serum beta-hydroxybutyrate is preferred for diagnosing and following ketosis."
     },
     {
       "order_id": "cbc",
@@ -531,7 +539,8 @@
         "dose_units": "units",
         "route": "IV",
         "frequency": "continuous"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: continuous IV regular insulin after fluid and potassium are addressed."
     },
     {
       "order_id": "ns-bolus",
@@ -616,7 +625,8 @@
         "dose_units": "mL",
         "route": "IV",
         "frequency": "once"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: isotonic crystalloid resuscitation precedes insulin in DKA."
     },
     {
       "order_id": "ns-maintenance",
@@ -786,7 +796,8 @@
         "dose_units": "mEq",
         "route": "IV",
         "frequency": "q4h"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: replace potassium before and during insulin; hold insulin if potassium is low."
     },
     {
       "order_id": "d5",
@@ -871,7 +882,8 @@
         "dose_units": "mL",
         "route": "IV",
         "frequency": "continuous"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: add dextrose once glucose falls, so the insulin infusion can continue until the gap closes."
     },
     {
       "order_id": "ondansetron",
@@ -981,7 +993,8 @@
           "hint": "Parameters stated by the clinician"
         }
       ],
-      "defaults": {}
+      "defaults": {},
+      "guideline_note": "ADA Standards of Care 2025: hourly point-of-care glucose while on an insulin infusion."
     },
     {
       "order_id": "io",
@@ -1102,7 +1115,8 @@
       ],
       "defaults": {
         "priority": "urgent"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: specialist involvement for hyperglycemic crises where available."
     }
   ]
 }

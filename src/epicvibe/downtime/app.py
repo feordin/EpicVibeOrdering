@@ -12,7 +12,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from pydantic import BaseModel
 
@@ -20,9 +21,24 @@ from epicvibe.downtime import hl7
 from epicvibe.downtime.config import DowntimeSettings
 from epicvibe.downtime.engine import DowntimeEngine
 from epicvibe.downtime.mllp import STUCK_AFTER_SECONDS, submit_batch
+from epicvibe.downtime.offline import OfflineSettings, enforce_strict, offline_report
 from epicvibe.downtime.providers import build_provider
 from epicvibe.downtime.store import DowntimeStore
 from epicvibe.downtime.templates import load_templates
+from epicvibe.downtime.transcribe import (
+    INSTALL_HINT,
+    Transcriber,
+    TranscriberUnavailable,
+    TranscribeSettings,
+)
+
+#: Sample audio for the demo lives next to the sample transcripts.
+AUDIO_DIR = Path(__file__).resolve().parents[3] / "fixtures" / "downtime" / "audio"
+AUDIO_SUFFIXES = {".wav": "audio/wav", ".webm": "audio/webm", ".mp3": "audio/mpeg",
+                  ".ogg": "audio/ogg", ".m4a": "audio/mp4", ".flac": "audio/flac"}
+#: A 90-second ambient capture is a couple of MB; anything far past that is a
+#: mistake, not a clinic visit, and we would rather say so than swap to disk.
+MAX_AUDIO_BYTES = 64 * 1024 * 1024
 
 
 class GenerateRequest(BaseModel):
@@ -50,17 +66,39 @@ class EhrStatusRequest(BaseModel):
     online: bool
 
 
-def create_app(settings: DowntimeSettings | None = None) -> FastAPI:
+def create_app(
+    settings: DowntimeSettings | None = None,
+    transcriber: Transcriber | None = None,
+    audio_dir: Path | None = None,
+    offline: OfflineSettings | None = None,
+) -> FastAPI:
     settings = settings or DowntimeSettings()
+    offline = offline or OfflineSettings()
+    transcriber = transcriber or Transcriber(TranscribeSettings())
+
+    def _offline_report() -> dict:
+        return offline_report(settings, transcriber.settings, strict=offline.strict)
+
+    # A deployment that promises "nothing leaves this box" has to fail loudly at
+    # startup rather than quietly at the bedside - and before anything else is
+    # built, so the refusal names the config problem and not a downstream one.
+    if offline.strict:
+        enforce_strict(_offline_report())
+
     library = load_templates(settings.templates_dir)
     store = DowntimeStore(settings.db_path)
     engine = DowntimeEngine(library, build_provider(settings))
+    audio_dir = Path(audio_dir) if audio_dir is not None else AUDIO_DIR
 
     app = FastAPI(title="EpicVibe Downtime Ordering", version="0.1.0")
     app.state.settings = settings
     app.state.library = library
     app.state.store = store
     app.state.engine = engine
+    app.state.transcriber = transcriber
+    app.state.audio_dir = audio_dir
+    app.state.offline_settings = offline
+
     # Server-side, so every browser tab (and the API) agrees on whether the EHR is
     # back. The downtime default is "down" - that is why this app is running.
     app.state.ehr_online = False
@@ -77,17 +115,25 @@ def create_app(settings: DowntimeSettings | None = None) -> FastAPI:
 
     # -- status / reference data -------------------------------------------
 
+    @app.get("/api/offline")
+    async def offline_status() -> dict:
+        """Per-item proof that nothing in this deployment reaches off-box."""
+        return await run_in_threadpool(_offline_report)
+
     @app.get("/api/status")
     async def status() -> dict:
+        report = await run_in_threadpool(_offline_report)
         return {
             "provider": settings.provider,
-            "model": settings.model if settings.provider == "anthropic" else "keyword-fake",
+            "model": getattr(engine.provider, "describe", lambda: "keyword-fake")(),
             "engine": f"{settings.engine_host}:{settings.engine_port}",
             "db_path": str(settings.db_path),
             "templates": len(library),
             "counts": store.counts(),
             "ehr_online": app.state.ehr_online,
             "allow_phi_to_model": settings.allow_phi_to_model,
+            "offline": {"strict": report["strict"], "all_local": report["all_local"],
+                        "not_local": report["not_local"]},
         }
 
     @app.post("/api/ehr-status")
@@ -117,6 +163,62 @@ def create_app(settings: DowntimeSettings | None = None) -> FastAPI:
             return []
         return [{"name": p.stem, "text": p.read_text(encoding="utf-8")}
                 for p in sorted(d.glob("*.txt"))]
+
+    # -- local transcription ------------------------------------------------
+
+    def _audio_files() -> list[Path]:
+        d = Path(app.state.audio_dir)
+        if not d.is_dir():
+            return []
+        return sorted(p for p in d.iterdir()
+                      if p.is_file() and p.suffix.lower() in AUDIO_SUFFIXES)
+
+    async def _transcribe(data: bytes, content_type: str | None) -> dict:
+        t: Transcriber = app.state.transcriber
+        if not t.enabled:
+            raise HTTPException(501, "local transcription is disabled "
+                                     "(EPICVIBE_DOWNTIME_WHISPER_ENABLED=1 to turn it on)")
+        if not t.available():
+            raise HTTPException(501, INSTALL_HINT)
+        if len(data) > MAX_AUDIO_BYTES:
+            raise HTTPException(413, f"audio body is larger than {MAX_AUDIO_BYTES} bytes")
+        try:
+            # Whisper is CPU-bound and blocking; off the event loop it goes, or
+            # the queue and recovery panes stop responding mid-transcription.
+            result = await run_in_threadpool(t.transcribe, data, content_type)
+        except TranscriberUnavailable as exc:
+            raise HTTPException(501, str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except Exception as exc:  # decode failures, corrupt containers
+            raise HTTPException(422, f"could not transcribe audio: {exc}") from exc
+        return result.model_dump()
+
+    @app.get("/api/transcribe/status")
+    async def transcribe_status() -> dict:
+        t: Transcriber = app.state.transcriber
+        return {**t.status(), "samples": [p.stem for p in _audio_files()]}
+
+    @app.post("/api/transcribe")
+    async def transcribe(request: Request) -> dict:
+        """Raw audio bytes in the body - no multipart, so no extra dependency."""
+        data = await request.body()
+        if not data:
+            raise HTTPException(400, "audio body is empty")
+        return await _transcribe(data, request.headers.get("content-type"))
+
+    @app.get("/api/transcripts/audio")
+    async def audio_samples() -> list[dict]:
+        return [{"name": p.stem, "filename": p.name, "bytes": p.stat().st_size,
+                 "content_type": AUDIO_SUFFIXES[p.suffix.lower()]}
+                for p in _audio_files()]
+
+    @app.post("/api/transcribe/sample/{name}")
+    async def transcribe_sample(name: str) -> dict:
+        match = next((p for p in _audio_files() if p.stem == name or p.name == name), None)
+        if match is None:
+            raise HTTPException(404, f"unknown audio sample {name}")
+        return await _transcribe(match.read_bytes(), AUDIO_SUFFIXES[match.suffix.lower()])
 
     # -- extraction ---------------------------------------------------------
 
@@ -292,6 +394,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .chip.high{background:#e7f6ec;color:#14532d}.chip.medium{background:#fef6e0;color:#7c4a03}
 .chip.low{background:#f1f2f4;color:#4b5563}
 .chip.none{background:#fdecea;color:var(--red)}
+/* a value nobody said out loud: it came out of the template, not the model */
+.chip.dflt{background:#f1f2f4;color:#4b5563;border-style:dashed}
+#offline{font-weight:700;font-size:11px;letter-spacing:.06em;padding:2px 8px;border-radius:9px;
+         border:1px solid #fff6;background:#ffffff22;cursor:help}
+#offline.leaky{font-weight:400;letter-spacing:0;border-color:transparent;background:none;opacity:.8}
+.guideline{font-size:12px;color:var(--muted);margin-top:2px}
 .order{border:1px solid var(--line);border-radius:5px;padding:8px;margin:6px 0;background:#fcfcfd}
 .order.on{border-color:var(--blue);background:#f7f9ff}
 .order .hdr{display:flex;gap:8px;align-items:flex-start}
@@ -317,11 +425,17 @@ pre{background:#0f172a;color:#e2e8f0;padding:10px;border-radius:5px;overflow:aut
         align-items:center;gap:10px}
 #errBar.show{display:flex}
 #errBar button{margin-left:auto;font-size:12px;padding:2px 8px}
+.rec{color:var(--red);font-weight:600}
+.spin{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:-1px;
+      border:2px solid var(--line);border-top-color:var(--blue);border-radius:50%;
+      animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .cat{margin-top:10px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 </style></head><body>
 
 <div id="banner"><span id="bannerText">EHR OFFLINE — downtime mode</span>
   <button id="toggleMode">Mark EHR ONLINE</button>
+  <span id="offline"></span>
   <span id="meta"></span></div>
 
 <div id="errBar"><span id="errText"></span><button id="errDismiss">Dismiss</button></div>
@@ -332,6 +446,20 @@ pre{background:#0f172a;color:#e2e8f0;padding:10px;border-radius:5px;overflow:aut
     <div class="row">
       <select id="sample"><option value="">Load sample…</option></select>
     </div>
+    <div id="audioBox" hidden>
+      <div class="row">
+        <button id="record">● Record</button>
+        <button id="stopRecord" hidden>■ Stop</button>
+        <span id="recTimer" class="muted"></span>
+        <label class="muted" style="cursor:pointer">Upload audio
+          <input type="file" id="audioFile" accept="audio/*" hidden></label>
+      </div>
+      <div class="row">
+        <select id="audioSample"><option value="">Transcribe sample audio…</option></select>
+      </div>
+      <div id="sttStatus" class="muted"></div>
+    </div>
+    <div id="audioHint" class="muted" hidden></div>
     <textarea id="transcript" placeholder="Paste or dictate the encounter transcript…"></textarea>
     <div class="row">
       <button class="primary" id="generate">Generate orders</button>
@@ -412,9 +540,13 @@ function orderById(orderId) {
 }
 function setFieldValue(list, fieldId, value) {
   let f = list.find(x => x.field_id === fieldId);
-  if (!f) { f = {field_id: fieldId, value: null, evidence: null, confidence: "low"};
+  if (!f) { f = {field_id: fieldId, value: null, evidence: null, confidence: "low",
+                 source: "none"};
             list.push(f); }
   f.value = value;
+  /* A value the clinician typed is neither a transcript quote nor a template
+     default any more, and must not keep wearing either chip. */
+  f.evidence = null; f.source = "none";
 }
 
 function renderMode(next) {
@@ -433,6 +565,32 @@ async function setMode(next) {
   renderMode(r.ehr_online);
 }
 
+/* Locality badge. "LOCAL ONLY" is a claim, so it is only shown when every
+   check actually passed; otherwise the failing checks are named. */
+const OFFLINE_LABELS = {
+  provider_local: "inference runs on this box",
+  whisper_installed: "faster-whisper installed",
+  whisper_model_cached: "Whisper weights cached on disk",
+  engine_reachable: "integration engine on a private address",
+};
+function renderOffline(off) {
+  const el = $("#offline");
+  if (!off) { el.textContent = ""; el.title = ""; return; }
+  const checks = Object.keys(OFFLINE_LABELS)
+    .map(k => `${(off.not_local || []).includes(k) ? "✗" : "✓"} ${OFFLINE_LABELS[k]}`)
+    .join("\n");
+  if (off.all_local) {
+    el.className = "";
+    el.textContent = off.strict ? "LOCAL ONLY · STRICT" : "LOCAL ONLY";
+    el.title = `Nothing in this deployment reaches off-box:\n${checks}`;
+  } else {
+    el.className = "leaky";
+    el.textContent = "not local: " +
+      (off.not_local || []).map(k => OFFLINE_LABELS[k] || k).join(", ");
+    el.title = checks;
+  }
+}
+
 function metaText(status) {
   const model = status.provider === "anthropic" && status.allow_phi_to_model
     ? `model: ${status.model} (transcript sent to hosted model)`
@@ -443,6 +601,7 @@ function metaText(status) {
 async function boot() {
   const [status, samples] = await Promise.all([api("/api/status"), api("/api/transcripts")]);
   renderMode(status.ehr_online);
+  renderOffline(status.offline);
   $("#meta").textContent = `${metaText(status)} · ${status.templates} templates`;
   const sel = $("#sample");
   samples.forEach(s => { const o = document.createElement("option");
@@ -450,6 +609,121 @@ async function boot() {
   sel.onchange = () => { const o = sel.selectedOptions[0];
     if (o && o.dataset.text) $("#transcript").value = o.dataset.text; };
   await refreshQueue();
+  await bootAudio();
+}
+
+/* ---- local transcription (Whisper via faster-whisper, no network) -------- */
+let sttBusy = false, recorder = null, recChunks = [], recStart = 0, recTicker = null;
+
+function sttMsg(html) { $("#sttStatus").innerHTML = html; }
+function sttBusyOn(what) {
+  sttBusy = true;
+  ["#record","#stopRecord","#audioSample","#audioFile"].forEach(s => $(s).disabled = true);
+  sttMsg(`<span class="spin"></span>transcribing ${esc(what)}…`);
+}
+function sttBusyOff() {
+  sttBusy = false;
+  ["#record","#audioSample","#audioFile"].forEach(s => $(s).disabled = false);
+}
+
+/* The transcript box is the clinician's working copy - never clobber typed or
+   edited text without asking. */
+function applyTranscript(result) {
+  const ta = $("#transcript");
+  const existing = ta.value.trim();
+  if (existing && !confirm("Replace the existing transcript with the transcription?")) {
+    sttMsg(`<span class="muted">kept existing transcript</span>`);
+    return;
+  }
+  ta.value = result.text || "";
+  const secs = result.duration_s ? ` · ${result.duration_s.toFixed(1)}s audio` : "";
+  sttMsg(`<span class="muted">${esc(result.model)} · ${Number(result.elapsed_s).toFixed(1)}s` +
+         `${secs} · ${esc(result.language || "?")} · ${result.segments.length} segments</span>`);
+}
+
+async function transcribeBlob(blob, label) {
+  if (sttBusy) return;
+  sttBusyOn(label);
+  try {
+    const r = await fetch("/api/transcribe", {
+      method: "POST",
+      headers: {"content-type": blob.type || "audio/wav"},
+      body: blob,
+    });
+    if (!r.ok) throw new Error((await r.text()) || r.statusText);
+    applyTranscript(await r.json());
+    clearError();
+  } finally { sttBusyOff(); }
+}
+
+async function transcribeSample(name) {
+  if (sttBusy || !name) return;
+  sttBusyOn(name);
+  try { applyTranscript(await post(`/api/transcribe/sample/${encodeURIComponent(name)}`));
+        clearError(); }
+  finally { sttBusyOff(); }
+}
+
+async function startRecording() {
+  const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+  recChunks = [];
+  recorder = new MediaRecorder(stream, MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+    ? {mimeType: "audio/webm;codecs=opus"} : {});
+  recorder.ondataavailable = e => { if (e.data && e.data.size) recChunks.push(e.data); };
+  recorder.onstop = guard(async () => {
+    stream.getTracks().forEach(t => t.stop());
+    clearInterval(recTicker); recTicker = null;
+    $("#record").hidden = false; $("#stopRecord").hidden = true;
+    $("#recTimer").className = "muted";
+    const blob = new Blob(recChunks, {type: recorder.mimeType || "audio/webm"});
+    recorder = null;
+    if (!blob.size) { sttMsg(`<span class="muted">nothing recorded</span>`); return; }
+    await transcribeBlob(blob, "recording");
+  });
+  recorder.start(1000);
+  recStart = Date.now();
+  $("#record").hidden = true; $("#stopRecord").hidden = false;
+  $("#recTimer").className = "rec";
+  const tick = () => {
+    const t = Math.floor((Date.now() - recStart) / 1000);
+    $("#recTimer").textContent =
+      `● recording ${String(Math.floor(t/60)).padStart(2,"0")}:${String(t%60).padStart(2,"0")}`;
+  };
+  tick(); recTicker = setInterval(tick, 500);
+}
+
+async function bootAudio() {
+  let st;
+  try { st = await api("/api/transcribe/status"); } catch { return; }
+  if (!st.enabled || !st.installed) {
+    $("#audioHint").hidden = false;
+    $("#audioHint").textContent = st.enabled
+      ? `Audio input unavailable — ${st.install_hint}`
+      : "Audio input is disabled on this deployment.";
+    return;
+  }
+  $("#audioBox").hidden = false;
+  if (!navigator.mediaDevices || !window.MediaRecorder) {
+    $("#record").disabled = true;
+    $("#record").title = "this browser has no MediaRecorder; use Upload audio instead";
+  }
+  const sel = $("#audioSample");
+  (await api("/api/transcripts/audio")).forEach(a => {
+    const o = document.createElement("option");
+    o.value = a.name;
+    o.textContent = `${a.name} (${(a.bytes/1048576).toFixed(1)} MB)`;
+    sel.appendChild(o);
+  });
+  sttMsg(`<span class="muted">local Whisper · model ${esc(st.model)}` +
+         `${st.model_cached ? "" : " (weights not cached yet — first run downloads them)"}</span>`);
+  sel.onchange = guard(() => { const n = sel.value; sel.value = ""; return transcribeSample(n); });
+  $("#record").onclick = guard(startRecording);
+  $("#stopRecord").onclick = guard(() => { if (recorder) recorder.stop(); });
+  $("#audioFile").onchange = guard(async () => {
+    const f = $("#audioFile").files[0];
+    $("#audioFile").value = "";
+    if (f) await transcribeBlob(f, f.name);
+  });
 }
 
 async function generate(templateId) {
@@ -464,26 +738,39 @@ async function generate(templateId) {
   } catch (e) { $("#genStatus").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
 }
 
-function chip(f) {
-  if (f.evidence) return `<span class="chip ${esc(f.confidence)}" title="${esc(f.evidence)}">“${esc(f.evidence.slice(0,60))}”</span>`;
-  if (f.value) return `<span class="chip low" title="from template default — no transcript evidence">no quote · ${esc(f.confidence)}</span>`;
+/* Three provenance chips, because the clinician is signing this:
+   green  = the clinician said it (quote in the title)
+   grey   = a guideline-derived template default, nobody said it
+   red    = required and nowhere to be found. */
+function chip(f, note) {
+  if (f.source === "transcript" && f.evidence)
+    return `<span class="chip ${esc(f.confidence)}" title="transcript: ${esc(f.evidence)}">“${esc(f.evidence.slice(0,60))}”</span>`;
+  if (f.source === "default")
+    return `<span class="chip dflt" title="${esc(note ||
+      "template default — a value from the order set, not from the transcript")}">template default</span>`;
+  if (f.value)
+    return `<span class="chip low" title="no transcript quote backs this value">no quote · ${esc(f.confidence)}</span>`;
   return `<span class="chip none" title="not stated in the transcript">not in transcript</span>`;
 }
 
-function fieldRow(spec, filled, scope, orderId) {
+function fieldRow(spec, filled, scope, orderId, note) {
   const missing = spec.required && !filled.value;
   return `<div class="field ${missing ? "missing" : ""}">
     <label>${esc(spec.label)}${spec.required ? ' <span class="req">*</span>' : ""}</label>
     <div><input data-scope="${esc(scope)}" data-oid="${esc(orderId || "")}"
       data-fid="${esc(spec.field_id)}" value="${esc(filled.value || "")}"
-      placeholder="${esc(spec.hint || "")}">${chip(filled)}</div></div>`;
+      placeholder="${esc(spec.hint || "")}">${chip(filled, note)}</div></div>`;
 }
 
 function render() {
   $("#empty").hidden = true; $("#form").hidden = false;
   const {selection, filled, template} = state;
+  const g = template.guideline;
+  const gLine = g ? `<div class="guideline">Guideline: ${esc(
+      [g.organization, g.year, g.name].filter(Boolean).join(" "))}</div>` : "";
   $("#selection").innerHTML = `<div class="warn"><b>${esc(template.name)}</b>
-    — confidence ${esc(selection.confidence)}<br><span class="muted">${esc(selection.rationale)}</span></div>`;
+    — confidence ${esc(selection.confidence)}${gLine}
+    <span class="muted">${esc(selection.rationale)}</span></div>`;
 
   const sw = $("#switchTemplate"); sw.innerHTML = "";
   const ids = [template.template_id, ...selection.alternatives.map(a => a.template_id)];
@@ -517,7 +804,8 @@ function render() {
         <div><b>${esc(spec.display)}</b>
           <div class="rat">${esc(spec.code)} · ${esc(o.rationale || "")}</div></div></div>
       <div class="flds">${spec.fields.map(fs =>
-          fieldRow(fs, ff.get(fs.field_id) || {}, "order", spec.order_id)).join("")}</div></div>`;
+          fieldRow(fs, ff.get(fs.field_id) || {}, "order", spec.order_id,
+                   spec.guideline_note)).join("")}</div></div>`;
   });
   $("#orders").innerHTML = html;
 
@@ -562,6 +850,7 @@ async function refreshQueue() {
   const [orders, recovery, status] = await Promise.all(
     [api("/api/orders"), api("/api/recovery"), api("/api/status")]);
   renderMode(status.ehr_online);
+  renderOffline(status.offline);
   $("#meta").textContent = `${metaText(status)} · ` +
     Object.entries(status.counts).map(([k,v]) => `${k}:${v}`).join(" ");
   $("#queue").innerHTML = orders.length ? orders.map(o => `<div class="qrow">

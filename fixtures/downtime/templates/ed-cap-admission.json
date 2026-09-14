@@ -25,6 +25,12 @@
     "azithromycin",
     "curb-65"
   ],
+  "guideline": {
+    "name": "Diagnosis and Treatment of Adults with Community-acquired Pneumonia",
+    "organization": "IDSA/ATS",
+    "year": 2019,
+    "url": "https://www.thoracic.org/statements/resources/tb-opi/diagnosis-and-treatment-of-adults-with-community-acquired-pneumonia.pdf"
+  },
   "patient_fields": [
     {
       "field_id": "patient_name",
@@ -248,7 +254,8 @@
       "defaults": {
         "priority": "STAT",
         "indication": "pneumonia, before antibiotics"
-      }
+      },
+      "guideline_note": "IDSA/ATS 2019 CAP: blood cultures before antibiotics in patients admitted with severe CAP or risk factors for resistant organisms."
     },
     {
       "order_id": "sputum-cx",
@@ -286,7 +293,8 @@
       ],
       "defaults": {
         "priority": "STAT"
-      }
+      },
+      "guideline_note": "IDSA/ATS 2019 CAP: sputum Gram stain and culture in severe CAP or when MRSA/Pseudomonas risk factors are present."
     },
     {
       "order_id": "strep-urine-ag",
@@ -324,7 +332,8 @@
       ],
       "defaults": {
         "priority": "routine"
-      }
+      },
+      "guideline_note": "IDSA/ATS 2019 CAP: pneumococcal urinary antigen is not recommended routinely; reserve it for severe CAP."
     },
     {
       "order_id": "resp-panel",
@@ -413,7 +422,8 @@
       "defaults": {
         "priority": "STAT",
         "contrast": "none"
-      }
+      },
+      "guideline_note": "IDSA/ATS 2019 CAP: radiographic confirmation is part of the CAP definition."
     },
     {
       "order_id": "ceftriaxone",
@@ -498,7 +508,8 @@
         "dose_units": "g",
         "route": "IV",
         "frequency": "daily"
-      }
+      },
+      "guideline_note": "IDSA/ATS 2019 CAP: beta-lactam plus a macrolide for non-severe inpatient CAP."
     },
     {
       "order_id": "azithromycin",
@@ -584,7 +595,8 @@
         "route": "IV",
         "frequency": "daily",
         "duration": "5 days"
-      }
+      },
+      "guideline_note": "IDSA/ATS 2019 CAP: the macrolide half of the combination for non-severe inpatient CAP."
     },
     {
       "order_id": "acetaminophen",
@@ -785,7 +797,8 @@
           "required": false
         }
       ],
-      "defaults": {}
+      "defaults": {},
+      "guideline_note": "Supportive care alongside the IDSA/ATS 2019 CAP regimen; the SpO2 target is the local downtime default."
     },
     {
       "order_id": "vitals-q4",

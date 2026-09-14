@@ -23,6 +23,12 @@
     "foot exam",
     "clinic follow-up"
   ],
+  "guideline": {
+    "name": "Standards of Care in Diabetes",
+    "organization": "American Diabetes Association",
+    "year": 2025,
+    "url": "https://diabetesjournals.org/care/issue/48/Supplement_1"
+  },
   "patient_fields": [
     {
       "field_id": "patient_name",
@@ -131,7 +137,8 @@
       "defaults": {
         "priority": "routine",
         "indication": "new type 2 diabetes"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: A1C at diagnosis and to set the individualized glycemic target."
     },
     {
       "order_id": "cmp",
@@ -245,7 +252,8 @@
       ],
       "defaults": {
         "priority": "routine"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: urine albumin-to-creatinine ratio at diagnosis and annually."
     },
     {
       "order_id": "tsh",
@@ -445,7 +453,8 @@
         "route": "PO",
         "frequency": "daily",
         "duration": "titrate to BID over 2 weeks"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: metformin remains a first-line agent for newly diagnosed type 2 diabetes, titrated from a low starting dose."
     },
     {
       "order_id": "atorvastatin",
@@ -530,7 +539,8 @@
         "dose_units": "mg",
         "route": "PO",
         "frequency": "daily"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: statin therapy for adults with diabetes, intensity set by age and ASCVD risk."
     },
     {
       "order_id": "lisinopril",
@@ -615,7 +625,8 @@
         "dose_units": "mg",
         "route": "PO",
         "frequency": "daily"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: ACE inhibitor or ARB for diabetes with hypertension or albuminuria."
     },
     {
       "order_id": "glucometer",
@@ -672,7 +683,8 @@
           "hint": "Parameters stated by the clinician"
         }
       ],
-      "defaults": {}
+      "defaults": {},
+      "guideline_note": "ADA Standards of Care 2025: comprehensive foot exam at diagnosis and at least annually."
     },
     {
       "order_id": "followup",
@@ -741,7 +753,8 @@
       ],
       "defaults": {
         "priority": "urgent"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: diabetes self-management education and medical nutrition therapy at diagnosis."
     },
     {
       "order_id": "ophtho",
@@ -778,7 +791,8 @@
       ],
       "defaults": {
         "priority": "urgent"
-      }
+      },
+      "guideline_note": "ADA Standards of Care 2025: dilated retinal exam at diagnosis of type 2 diabetes."
     },
     {
       "order_id": "diet",
