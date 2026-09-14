@@ -1,0 +1,31 @@
+{
+  "template_id": "ed-chest-pain-acs",
+  "notes": "ED Room 12 ACS rule-out. Age 61 only, no DOB and no weight stated.",
+  "patient_fields": {
+    "patient_name": "Castellano",
+    "sex": "female",
+    "allergies": [
+      "nkda",
+      "no known"
+    ],
+    "ordering_provider": "Okafor",
+    "encounter_location": "Room 12"
+  },
+  "selected_orders": [
+    "trop-0",
+    "trop-3",
+    "cbc",
+    "bmp",
+    "ecg",
+    "cxr",
+    "aspirin",
+    "tele",
+    "vitals-q1",
+    "diet",
+    "activity",
+    "cards"
+  ],
+  "deselected_orders": [
+    "nitroglycerin-sl"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "template_id": "sepsis-bundle",
+  "notes": "Resus Bay 1 septic shock. Norepinephrine is deliberately in neither list: the clinician asks for it at the bedside but conditions starting it on the post-bolus MAP, so either answer is defensible.",
+  "patient_fields": {
+    "patient_name": "Oyelaran",
+    "sex": "male",
+    "weight_kg": "70",
+    "allergies": "penicillin",
+    "ordering_provider": "Whitfield",
+    "encounter_location": [
+      "Bay 1",
+      "bay one"
+    ]
+  },
+  "selected_orders": [
+    "lactate-0",
+    "lactate-repeat",
+    "bcx",
+    "cbc",
+    "cmp",
+    "coags",
+    "ua",
+    "cxr",
+    "ns-bolus",
+    "cefepime",
+    "vancomycin",
+    "map",
+    "vitals-q15",
+    "io",
+    "diet",
+    "icu"
+  ],
+  "deselected_orders": [
+    "pip-tazo"
+  ]
+}

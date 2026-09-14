@@ -1,0 +1,36 @@
+{
+  "template_id": "dka-management",
+  "notes": "MICU Room 8 DKA. Age 23 is stated but not a DOB, so dob is not expected.",
+  "patient_fields": {
+    "patient_name": "Raghavan",
+    "sex": "female",
+    "weight_kg": "58",
+    "allergies": [
+      "nkda",
+      "no known"
+    ],
+    "ordering_provider": "Nakamura",
+    "encounter_location": "Room 8"
+  },
+  "selected_orders": [
+    "bmp-q2",
+    "vbg",
+    "bhb",
+    "cbc",
+    "ua-ketones",
+    "ecg",
+    "insulin-drip",
+    "ns-bolus",
+    "ns-maintenance",
+    "d5",
+    "ondansetron",
+    "glucose-q1",
+    "io",
+    "diet",
+    "endo"
+  ],
+  "deselected_orders": [
+    "kcl",
+    "neuro"
+  ]
+}

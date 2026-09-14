@@ -1,0 +1,31 @@
+{
+  "template_id": "ed-cap-admission",
+  "notes": "ED Bay 4 CAP admission. Sputum culture is added on the nurse's prompt; the viral panel is declined.",
+  "patient_fields": {
+    "patient_name": "Bennett",
+    "dob": "1952-03-14",
+    "sex": "male",
+    "weight_kg": "82",
+    "allergies": "sulfa",
+    "ordering_provider": "Alvarez",
+    "encounter_location": "Bay 4"
+  },
+  "selected_orders": [
+    "cbc",
+    "cmp",
+    "lactate",
+    "bcx",
+    "sputum-cx",
+    "cxr",
+    "ceftriaxone",
+    "azithromycin",
+    "o2",
+    "vitals-q4",
+    "diet",
+    "activity"
+  ],
+  "deselected_orders": [
+    "resp-panel",
+    "pulm"
+  ]
+}

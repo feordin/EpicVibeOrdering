@@ -1,0 +1,32 @@
+{
+  "template_id": "ambulatory-new-t2dm",
+  "notes": "Riverbend clinic, new T2DM diagnosis. No MRN is stated anywhere in the transcript.",
+  "patient_fields": {
+    "patient_name": "Pritchard",
+    "dob": "1979-06-21",
+    "sex": "female",
+    "weight_kg": "91",
+    "allergies": [
+      "nkda",
+      "no known"
+    ],
+    "ordering_provider": "Sandoval",
+    "encounter_location": "Room 3"
+  },
+  "selected_orders": [
+    "a1c",
+    "cmp",
+    "lipid",
+    "microalbumin",
+    "metformin",
+    "glucometer",
+    "followup",
+    "dietitian",
+    "ophtho",
+    "diet",
+    "activity"
+  ],
+  "deselected_orders": [
+    "atorvastatin"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "template_id": "chf-exacerbation-admission",
+  "notes": "Room 415 CHF admission. Magnesium and the fluid restriction are non-default orders the clinician explicitly adds.",
+  "patient_fields": {
+    "patient_name": "Brzezinski",
+    "dob": "1946-11-02",
+    "sex": "male",
+    "weight_kg": "94",
+    "allergies": "codeine",
+    "ordering_provider": "Lindqvist",
+    "encounter_location": "Room 415"
+  },
+  "selected_orders": [
+    "bnp",
+    "bmp-daily",
+    "cbc",
+    "mag",
+    "cxr",
+    "echo",
+    "ecg",
+    "furosemide",
+    "daily-weights",
+    "io",
+    "fluid-restriction",
+    "tele",
+    "diet",
+    "activity"
+  ],
+  "deselected_orders": [
+    "trop",
+    "carvedilol"
+  ]
+}

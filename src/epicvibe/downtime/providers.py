@@ -1,10 +1,13 @@
 """Inference providers for downtime extraction.
 
-Two implementations of the shared `InferenceProvider` protocol
+Three implementations of the shared `InferenceProvider` protocol
 (`complete_json(system, user, json_schema)`):
 
-* `AnthropicSdkProvider` - the real thing, via the official `anthropic` SDK
+* `AnthropicSdkProvider` - the hosted model, via the official `anthropic` SDK
   with a forced `emit` tool so the model can only answer in our schema.
+* `OllamaProvider` - a model running on this box via Ollama, using its
+  structured-output `format` parameter (a JSON schema) to pin the response
+  shape. Local weights, so the transcript never leaves the hospital.
 * `KeywordFakeProvider` - deterministic, no API key, no network. It reads the
   same prompts the real provider gets (the engine delimits the transcript and
   the template spec with XML-ish tags) and fills them with regex heuristics.
@@ -12,9 +15,12 @@ Two implementations of the shared `InferenceProvider` protocol
   unplugged, which is exactly the scenario the subsystem exists for.
 """
 
+import copy
 import json
 import re
 from typing import Any
+
+import httpx
 
 from epicvibe.downtime.config import DowntimeSettings
 
@@ -41,7 +47,11 @@ def _between(text: str, open_tag: str, close_tag: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-class AnthropicProviderError(RuntimeError):
+class ProviderError(RuntimeError):
+    """Any provider failure the capture UI should surface verbatim to the clinician."""
+
+
+class AnthropicProviderError(ProviderError):
     pass
 
 
@@ -80,6 +90,9 @@ class AnthropicSdkProvider:
             self._client = anthropic.AsyncAnthropic(
                 api_key=api_key, timeout=30.0, max_retries=2
             )
+
+    def describe(self) -> str:
+        return f"anthropic:{self.model}"
 
     def _tools(self, json_schema: dict, strict: bool) -> list[dict]:
         tool: dict[str, Any] = {
@@ -237,6 +250,9 @@ class KeywordFakeProvider:
 
     def __init__(self) -> None:
         self.calls: list[dict] = []
+
+    def describe(self) -> str:
+        return "fake:keyword"
 
     async def complete_json(self, *, system: str, user: str, json_schema: dict) -> dict:
         self.calls.append({"system": system, "user": user})
@@ -479,6 +495,228 @@ class KeywordFakeProvider:
 
 
 # ---------------------------------------------------------------------------
+# Ollama provider (local weights)
+# ---------------------------------------------------------------------------
+
+
+class OllamaProviderError(ProviderError):
+    pass
+
+
+# Keys that describe the node itself rather than the value it constrains, and so
+# must not be copied down into each generated `anyOf` branch.
+_NODE_KEYWORDS = {"anyOf", "oneOf", "allOf", "title", "description", "default",
+                  "$ref", "$defs", "required", "properties", "items"}
+
+
+def relax_json_schema(schema: dict) -> dict:
+    """Undo the Anthropic `strict: true` post-processing, for Ollama.
+
+    Ollama lowers the `format` schema into a llama.cpp GBNF grammar. That
+    converter understands plain JSON Schema - `anyOf`, `enum`, `$ref` - but not
+    the strict-tool dialect `schema.strict_json_schema()` emits: it has no
+    notion of `additionalProperties: false`, and a nullable union written as a
+    *list* of types (`"type": ["string", "null"]`) is not a shape it lowers.
+    So we walk the schema back to the plain pydantic form: list-typed nodes
+    become `anyOf`, and `additionalProperties: false` is dropped.
+
+    `required` is deliberately left as strictification set it - every property.
+    The engine's post-validation fills in whatever the model omits, but a
+    grammar that forces every key out of a small model yields far more filled
+    fields than one that lets it answer `{}`.
+    """
+    out = copy.deepcopy(schema)
+    _relax(out)
+    return out
+
+
+def _relax(node: object) -> None:
+    if isinstance(node, list):
+        for item in node:
+            _relax(item)
+        return
+    if not isinstance(node, dict):
+        return
+
+    # Only the strict-mode `false` is meaningless to a grammar. A real subschema
+    # under `additionalProperties` constrains extra keys and must survive.
+    if node.get("additionalProperties") is False:
+        node.pop("additionalProperties")
+
+    types = node.get("type")
+    if isinstance(types, list):
+        node.pop("type")
+        siblings = {k: v for k, v in node.items() if k not in _NODE_KEYWORDS}
+        for key in siblings:
+            node.pop(key, None)
+        node["anyOf"] = [
+            {"type": t} if t == "null" else {"type": t, **siblings} for t in types
+        ]
+
+    for value in list(node.values()):
+        _relax(value)
+
+
+class OllamaProvider:
+    """`InferenceProvider` backed by a model served by a local Ollama daemon.
+
+    Ollama runs on this box (or at least inside the hospital network), so unlike
+    the hosted provider it is *not* gated on `allow_phi_to_model`: the transcript
+    never leaves the machine, which is the whole point during a downtime. The
+    trade is latency - a large model on CPU-only hardware can take minutes for a
+    single fill - so the timeout defaults are deliberately generous.
+    """
+
+    def __init__(
+        self,
+        base_url: str = "http://localhost:11434",
+        model: str = "gemma4:26b",
+        timeout: float = 300.0,
+        keep_alive: str = "10m",
+        num_ctx: int = 16384,
+        think: bool | None = False,
+        client: httpx.AsyncClient | None = None,
+    ):
+        self.base_url = base_url.rstrip("/")
+        self.model = model
+        self.timeout = timeout
+        self.keep_alive = keep_alive
+        self.num_ctx = num_ctx
+        self.think = think
+        self._client = client
+        self._owns_client = client is None
+        # Flipped off permanently the first time a daemon or model rejects the
+        # `think` key, so we do not pay a failed round-trip on every call.
+        self._send_think = think is not None
+
+    def describe(self) -> str:
+        return f"ollama:{self.model}"
+
+    def _http(self) -> httpx.AsyncClient:
+        if self._client is None:
+            self._client = httpx.AsyncClient(timeout=self.timeout)
+        return self._client
+
+    async def aclose(self) -> None:
+        if self._client is not None and self._owns_client:
+            await self._client.aclose()
+            self._client = None
+
+    async def complete_json(self, *, system: str, user: str, json_schema: dict) -> dict:
+        schema = relax_json_schema(json_schema)
+        content = await self._chat(system, user, schema)
+        try:
+            return _as_object(content)
+        except ValueError as first:
+            # Small models occasionally wrap the object in prose or a fence even
+            # with a grammar applied. One nudge, then fail loudly.
+            nudge = (
+                f"{user}\n\nYour previous reply was not valid JSON. Return ONLY the JSON "
+                "object that matches the schema. No prose, no markdown fence, no commentary."
+            )
+            retry = await self._chat(system, nudge, schema)
+            try:
+                return _as_object(retry)
+            except ValueError as second:
+                raise OllamaProviderError(
+                    f"{self.describe()} did not return a JSON object "
+                    f"(first attempt: {first}; retry: {second}). "
+                    f"Raw retry response: {retry[:400]!r}"
+                ) from second
+
+    async def _chat(self, system: str, user: str, schema: dict) -> str:
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "stream": False,
+            "format": schema,
+            "keep_alive": self.keep_alive,
+            "options": {"temperature": 0, "num_ctx": self.num_ctx},
+        }
+        if self._send_think:
+            # Reasoning models put their scratchpad in `message.thinking`, not in
+            # `message.content`. Combined with a grammar-constrained `format`,
+            # one of them will happily spend its entire context thinking and
+            # return an empty content string with done_reason "length" - which is
+            # the single most confusing failure mode of this provider. Turning
+            # thinking off is what makes a 26B reasoning model usable here at all
+            # (measured: empty after 25k tokens, versus a complete fill in ~60s).
+            payload["think"] = self.think
+        url = f"{self.base_url}/api/chat"
+        try:
+            response = await self._http().post(url, json=payload, timeout=self.timeout)
+        except httpx.TimeoutException as exc:
+            raise OllamaProviderError(
+                f"{self.describe()} timed out after {self.timeout:g}s at {url}. "
+                "A large model on CPU can exceed this - raise "
+                "EPICVIBE_DOWNTIME_OLLAMA_TIMEOUT_SECONDS or use a smaller model."
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise OllamaProviderError(
+                f"cannot reach the Ollama daemon at {url} ({type(exc).__name__}: {exc}). "
+                "Is `ollama serve` running, and is EPICVIBE_DOWNTIME_OLLAMA_BASE_URL correct?"
+            ) from exc
+
+        if response.status_code != 200:
+            if self._send_think and "think" in response.text.lower():
+                # This model has no thinking mode to turn off. Drop the key and
+                # retry once; a non-reasoning model never had the problem it solves.
+                self._send_think = False
+                return await self._chat(system, user, schema)
+            raise OllamaProviderError(
+                f"Ollama returned HTTP {response.status_code} for model {self.model!r}: "
+                f"{response.text[:400]}"
+            )
+
+        try:
+            body = response.json()
+        except ValueError as exc:
+            raise OllamaProviderError(
+                f"Ollama returned a non-JSON envelope: {response.text[:200]!r}"
+            ) from exc
+
+        if isinstance(body, dict) and body.get("error"):
+            raise OllamaProviderError(f"Ollama error for model {self.model!r}: {body['error']}")
+
+        message = (body or {}).get("message") or {}
+        content = message.get("content") or ""
+        if not content and message.get("thinking"):
+            raise OllamaProviderError(
+                f"{self.describe()} returned only reasoning tokens and no answer "
+                f"(done_reason={body.get('done_reason')!r}, {body.get('eval_count')} tokens). "
+                "Set EPICVIBE_DOWNTIME_OLLAMA_THINK=false, or raise "
+                "EPICVIBE_DOWNTIME_OLLAMA_NUM_CTX so it has room to finish."
+            )
+        return content
+
+
+def _as_object(content: str) -> dict:
+    """Parse a chat response into a JSON object, tolerating a markdown fence."""
+    text = (content or "").strip()
+    if not text:
+        raise ValueError("empty response content")
+    fence = re.match(r"^```(?:json)?\s*(.*?)\s*```$", text, re.S)
+    if fence:
+        text = fence.group(1).strip()
+    try:
+        value = json.loads(text)
+    except json.JSONDecodeError:
+        start, end = text.find("{"), text.rfind("}")
+        if start == -1 or end <= start:
+            raise ValueError("response contained no JSON object") from None
+        try:
+            value = json.loads(text[start: end + 1])
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"invalid JSON: {exc}") from exc
+    if not isinstance(value, dict):
+        raise ValueError(f"expected a JSON object, got {type(value).__name__}")
+    return value
+
+
+# ---------------------------------------------------------------------------
 
 
 def build_provider(settings: DowntimeSettings):
@@ -498,4 +736,14 @@ def build_provider(settings: DowntimeSettings):
                 "(set EPICVIBE_DOWNTIME_ANTHROPIC_API_KEY or ANTHROPIC_API_KEY)"
             )
         return AnthropicSdkProvider(api_key=key, model=settings.model)
+    if settings.provider == "ollama":
+        # No PHI gate: Ollama runs on this box, so the transcript never leaves it.
+        return OllamaProvider(
+            base_url=settings.ollama_base_url,
+            model=settings.ollama_model,
+            timeout=settings.ollama_timeout_seconds,
+            keep_alive=settings.ollama_keep_alive,
+            num_ctx=settings.ollama_num_ctx,
+            think=settings.ollama_think,
+        )
     return KeywordFakeProvider()
