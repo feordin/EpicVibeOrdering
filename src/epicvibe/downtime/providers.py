@@ -18,6 +18,7 @@ Three implementations of the shared `InferenceProvider` protocol
 import copy
 import json
 import re
+import time
 from typing import Any
 
 import httpx
@@ -93,6 +94,12 @@ class AnthropicSdkProvider:
 
     def describe(self) -> str:
         return f"anthropic:{self.model}"
+
+    async def warmup(self) -> dict:
+        """No-op: a hosted model has nothing to load, and a warm-up call would
+        bill a request (and send a token of nothing) for no latency benefit."""
+        return {"provider": self.describe(), "loaded": True, "elapsed_s": 0.0,
+                "note": "hosted model - nothing to load on this box"}
 
     def _tools(self, json_schema: dict, strict: bool) -> list[dict]:
         tool: dict[str, Any] = {
@@ -253,6 +260,11 @@ class KeywordFakeProvider:
 
     def describe(self) -> str:
         return "fake:keyword"
+
+    async def warmup(self) -> dict:
+        """Nothing to load: the extractor is regexes compiled at import time."""
+        return {"provider": self.describe(), "loaded": True, "elapsed_s": 0.0,
+                "note": "deterministic extractor - no weights to load"}
 
     async def complete_json(self, *, system: str, user: str, json_schema: dict) -> dict:
         self.calls.append({"system": system, "user": user})
@@ -503,6 +515,11 @@ class OllamaProviderError(ProviderError):
     pass
 
 
+#: `/api/ps` is a bookkeeping read, not inference - it answers instantly or the
+#: daemon is not there, and a status page must not block on it.
+PS_TIMEOUT_S = 5.0
+
+
 # Keys that describe the node itself rather than the value it constrains, and so
 # must not be copied down into each generated `anyOf` branch.
 _NODE_KEYWORDS = {"anyOf", "oneOf", "allOf", "title", "description", "default",
@@ -601,6 +618,75 @@ class OllamaProvider:
         if self._client is not None and self._owns_client:
             await self._client.aclose()
             self._client = None
+
+    async def warmup(self) -> dict:
+        """Pull the weights into RAM now, so the clinician does not pay for it.
+
+        `/api/generate` with an *empty* prompt is Ollama's documented load-only
+        call: the daemon resolves the model, maps it into memory and returns
+        immediately without generating a token. With `keep_alive` set the model
+        then stays resident, which is the whole point of doing this before the
+        room rather than during it - the first real fill on a 26B model is
+        otherwise a minute of load time the clinician watches.
+        """
+        url = f"{self.base_url}/api/generate"
+        payload = {"model": self.model, "prompt": "", "keep_alive": self.keep_alive}
+        started = time.perf_counter()
+        try:
+            response = await self._http().post(url, json=payload, timeout=self.timeout)
+        except httpx.TimeoutException as exc:
+            raise OllamaProviderError(
+                f"{self.describe()} did not finish loading within {self.timeout:g}s at {url}. "
+                "A large model loading from cold disk can exceed this - raise "
+                "EPICVIBE_DOWNTIME_OLLAMA_TIMEOUT_SECONDS."
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise OllamaProviderError(
+                f"cannot reach the Ollama daemon at {url} ({type(exc).__name__}: {exc}). "
+                "Is `ollama serve` running, and is EPICVIBE_DOWNTIME_OLLAMA_BASE_URL correct?"
+            ) from exc
+
+        if response.status_code != 200:
+            raise OllamaProviderError(
+                f"Ollama returned HTTP {response.status_code} warming model {self.model!r}: "
+                f"{response.text[:400]}"
+            )
+        try:
+            body = response.json()
+        except ValueError:
+            body = {}
+        if isinstance(body, dict) and body.get("error"):
+            raise OllamaProviderError(
+                f"Ollama error warming model {self.model!r}: {body['error']}"
+            )
+        return {
+            "provider": self.describe(),
+            "loaded": True,
+            "elapsed_s": round(time.perf_counter() - started, 3),
+            "keep_alive": self.keep_alive,
+        }
+
+    async def is_loaded(self) -> bool:
+        """Is this model resident right now? `/api/ps` is Ollama's `ps`."""
+        url = f"{self.base_url}/api/ps"
+        try:
+            response = await self._http().get(url, timeout=PS_TIMEOUT_S)
+        except httpx.HTTPError:
+            # A status probe must never be the thing that breaks the status
+            # page: an unreachable daemon simply means "not loaded".
+            return False
+        if response.status_code != 200:
+            return False
+        try:
+            body = response.json()
+        except ValueError:
+            return False
+        names = {str(m.get("name") or m.get("model") or "")
+                 for m in (body or {}).get("models") or []}
+        # `ollama ps` reports the fully-qualified tag; a model configured as
+        # `gemma4` comes back as `gemma4:latest`, so match the bare name too.
+        return any(n == self.model or n.split(":")[0] == self.model.split(":")[0]
+                   and self.model in (n, n.split(":")[0]) for n in names)
 
     async def complete_json(self, *, system: str, user: str, json_schema: dict) -> dict:
         schema = relax_json_schema(json_schema)

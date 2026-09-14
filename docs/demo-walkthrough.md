@@ -208,20 +208,50 @@ Everything — speech-to-text, the model, the order set, the HL7 — is on the l
 
 ### Before the room
 
+One command starts both processes and **warms both models**:
+
+```powershell
+.\scripts\start-offline-demo.ps1                 # bash: ./scripts/start-offline-demo.sh
+```
+
+It checks the venv and that Ollama has the model (printing the `ollama pull` line if it
+does not), starts the mock HL7 engine on `:2575` and the downtime app on `:8200` with
+`EPICVIBE_DOWNTIME_OFFLINE_STRICT=true`, then calls `POST /api/warmup` and prints the
+offline checklist. It finishes with **"READY — open http://localhost:8200 — you can
+disconnect the network now"**. Stop it with `.\scripts\stop-offline-demo.ps1`.
+
+Flags: `-Model` (default `gemma4:26b`), `-WhisperModel` (default `medium`), `-Port`,
+`-EnginePort`, `-NoStrict`. Logs land in `.downtime-logs/`.
+
+**Why the warm-up matters.** Both models load lazily — Whisper on the first
+transcription, the Ollama weights on the first fill — so without this the *first*
+thing you do in front of the room pays for a cold model load: tens of seconds for
+Whisper, a minute or more for a 26B model on CPU. The script pays it up front and pins
+`EPICVIBE_DOWNTIME_OLLAMA_KEEP_ALIVE=2h`, so the weights stay resident for the whole
+session instead of expiring after the default 10 minutes and reloading mid-demo.
+
+Pre-cache the Whisper weights **while you still have internet** — run the script once,
+or point `EPICVIBE_DOWNTIME_WHISPER_MODEL_DIR` at a copied model directory.
+`GET /api/transcribe/status` reports `model_cached`. See `docs/runbook-demo.md` for the
+model-size trade-off and the exact cache path.
+
+<details>
+<summary>Manual start (four commands, if you would rather not use the script)</summary>
+
 ```bash
 export EPICVIBE_DOWNTIME_PROVIDER=ollama          # local weights, not a hosted model
 export EPICVIBE_DOWNTIME_OLLAMA_MODEL=...         # whatever `ollama list` shows
 export EPICVIBE_DOWNTIME_OFFLINE_STRICT=true      # refuse to start if anything is not local
+export EPICVIBE_DOWNTIME_OLLAMA_KEEP_ALIVE=2h     # or the model unloads mid-demo
+
+python -m epicvibe.downtime.mock_engine --port 2575 --inbox .downtime-inbox   # :2575
+python -m epicvibe.downtime                                                   # :8200
+curl -X POST http://localhost:8200/api/warmup                                 # load both models
 ```
 
 (PowerShell: `$env:EPICVIBE_DOWNTIME_PROVIDER = "ollama"`, and so on.)
 
-Pre-cache the Whisper weights **while you still have internet** — transcribe the sample
-audio once, or point `EPICVIBE_DOWNTIME_WHISPER_MODEL_DIR` at a copied model directory.
-`GET /api/transcribe/status` reports `model_cached`. See `docs/runbook-demo.md` for the
-model-size trade-off and the exact cache path.
-
-Start the mock integration engine and the downtime app as usual (`:2575`, `:8200`).
+</details>
 
 ### Pre-flight (do this in front of them)
 

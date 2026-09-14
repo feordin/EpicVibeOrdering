@@ -45,6 +45,10 @@ Scenario B needs the CDS service + mock EHR (:8000, :8100). Scenario A needs the
 HL7 engine + downtime app (:2575, :8200) — they're independent of each other and of
 Scenario B.
 
+For Scenario A there is a single command that also warms both local models before you
+demo: `.\scripts\start-offline-demo.ps1` (bash: `./scripts/start-offline-demo.sh`).
+See Scenario A below.
+
 Run the test suite at any point:
 
 ```bash
@@ -252,10 +256,46 @@ standalone demo harness.
 
 ### Processes
 
-| Piece | Port | Start command |
+One command starts both, warms both local models, and prints the offline checklist:
+
+```powershell
+.\scripts\start-offline-demo.ps1          # bash: ./scripts/start-offline-demo.sh
+.\scripts\stop-offline-demo.ps1           # bash: ./scripts/stop-offline-demo.sh
+```
+
+| Piece | Port | Started by the script as |
 |---|---|---|
 | Mock integration engine | 2575 | `python -m epicvibe.downtime.mock_engine --port 2575 --inbox .downtime-inbox` |
-| Downtime app | 8200 | `python -m epicvibe.downtime` |
+| Downtime app | 8200 | `python -m epicvibe.downtime` (provider `ollama`, `OFFLINE_STRICT=true`) |
+
+The script refuses to start if `.venv` is missing or if Ollama does not have the model
+(it prints the `ollama pull` line), waits for `/api/status`, then calls
+`POST /api/warmup` and reports how long each model took. Flags: `-Model` (default
+`gemma4:26b`), `-WhisperModel` (default `medium`), `-Port`, `-EnginePort`, `-NoStrict`.
+Process logs and PIDs land in `.downtime-logs/` (gitignored).
+
+**Warm up before the room.** Both models load lazily, so the first clinician action
+otherwise pays for a cold load - tens of seconds for Whisper, a minute or more for a
+26B model on CPU. `POST /api/warmup` loads the Whisper weights and issues Ollama's
+empty-prompt load call; `GET /api/warmup` reports what is resident right now (Whisper
+via the transcriber, Ollama via `/api/ps`). The script also pins
+`EPICVIBE_DOWNTIME_OLLAMA_KEEP_ALIVE=2h`, so the weights survive the whole session
+rather than unloading after the default 10 minutes and reloading mid-demo.
+
+<details>
+<summary>Manual start (if you would rather not use the script)</summary>
+
+```bash
+export EPICVIBE_DOWNTIME_PROVIDER=ollama          # or leave unset for the `fake` extractor
+export EPICVIBE_DOWNTIME_OFFLINE_STRICT=true
+export EPICVIBE_DOWNTIME_OLLAMA_KEEP_ALIVE=2h
+
+python -m epicvibe.downtime.mock_engine --port 2575 --inbox .downtime-inbox   # :2575
+python -m epicvibe.downtime                                                   # :8200
+curl -X POST http://localhost:8200/api/warmup                                 # load both models
+```
+
+</details>
 
 The mock engine (`src/epicvibe/downtime/mock_engine.py`) is an asyncio MLLP server that
 stands in for Epic Bridges/Rhapsody/Mirth: it accepts `ORM^O01` messages, writes each raw

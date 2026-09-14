@@ -9,6 +9,7 @@ clinician to review and sign, queue and recovery worklist on the right.
 """
 
 import json
+import time
 from pathlib import Path
 from typing import Any
 
@@ -22,7 +23,7 @@ from epicvibe.downtime.config import DowntimeSettings
 from epicvibe.downtime.engine import DowntimeEngine
 from epicvibe.downtime.mllp import STUCK_AFTER_SECONDS, submit_batch
 from epicvibe.downtime.offline import OfflineSettings, enforce_strict, offline_report
-from epicvibe.downtime.providers import build_provider
+from epicvibe.downtime.providers import ProviderError, build_provider
 from epicvibe.downtime.store import DowntimeStore
 from epicvibe.downtime.templates import load_templates
 from epicvibe.downtime.transcribe import (
@@ -135,6 +136,74 @@ def create_app(
             "offline": {"strict": report["strict"], "all_local": report["all_local"],
                         "not_local": report["not_local"]},
         }
+
+    # -- warm-up -------------------------------------------------------------
+    #
+    # Both models on this box load lazily: Whisper on the first transcription,
+    # the Ollama weights on the first fill. That is right for a long-running
+    # process and wrong for a demo or a real downtime, where the *first*
+    # clinician action is the one that pays - a minute of model load with a
+    # patient waiting. Warming both up front moves that cost before the room.
+
+    async def _warm_whisper() -> dict:
+        t: Transcriber = app.state.transcriber
+        if not t.enabled:
+            return {"loaded": False, "model": t.settings.model,
+                    "reason": "local transcription is disabled "
+                              "(EPICVIBE_DOWNTIME_WHISPER_ENABLED=1 to turn it on)"}
+        if not t.available():
+            return {"loaded": False, "model": t.settings.model, "reason": INSTALL_HINT}
+        started = time.perf_counter()
+        try:
+            # Building a WhisperModel is blocking CPU work, exactly like a
+            # transcription - same threadpool, same reason.
+            await run_in_threadpool(t.load)
+        except TranscriberUnavailable as exc:
+            return {"loaded": False, "model": t.settings.model, "reason": str(exc)}
+        except Exception as exc:  # missing weights, no disk, broken install
+            return {"loaded": False, "model": t.settings.model,
+                    "reason": f"could not load the Whisper model: {exc}"}
+        return {"loaded": True, "model": t.settings.model,
+                "elapsed_s": round(time.perf_counter() - started, 3)}
+
+    async def _warm_provider() -> dict:
+        warm = getattr(engine.provider, "warmup", None)
+        describe = getattr(engine.provider, "describe", lambda: settings.provider)
+        if warm is None:  # a provider that predates the protocol
+            return {"provider": describe(), "loaded": False,
+                    "reason": "provider does not support warm-up"}
+        try:
+            return await warm()
+        except ProviderError as exc:
+            # A failed warm-up is not a failed app: the clinician can still
+            # capture, and the error belongs on screen, not in a 500.
+            return {"provider": describe(), "loaded": False, "error": str(exc)}
+
+    @app.post("/api/warmup")
+    async def warmup() -> dict:
+        """Load both local models now. Idempotent, and safe to call while up."""
+        whisper = await _warm_whisper()
+        provider = await _warm_provider()
+        return {"whisper": whisper, "provider": provider,
+                "offline": await run_in_threadpool(_offline_report)}
+
+    @app.get("/api/warmup")
+    async def warmup_status() -> dict:
+        """Is each model resident *right now*? No loading, no side effects."""
+        t: Transcriber = app.state.transcriber
+        status = t.status()
+        whisper = {"loaded": bool(status["loaded"]), "model": status["model"],
+                   "enabled": status["enabled"], "installed": status["installed"],
+                   "model_cached": status["model_cached"]}
+        describe = getattr(engine.provider, "describe", lambda: settings.provider)
+        provider: dict[str, Any] = {"provider": describe()}
+        probe = getattr(engine.provider, "is_loaded", None)
+        if probe is None:
+            # Nothing to keep resident, so "loaded" is trivially true.
+            provider["loaded"] = True
+        else:
+            provider["loaded"] = bool(await probe())
+        return {"whisper": whisper, "provider": provider}
 
     @app.post("/api/ehr-status")
     async def set_ehr_status(req: EhrStatusRequest) -> dict:

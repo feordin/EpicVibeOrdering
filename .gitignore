@@ -8,3 +8,4 @@ audit.db
 .downtime-inbox/
 downtime.db
 *.db-journal
+.downtime-logs/

@@ -487,3 +487,115 @@ def test_api_key_resolution_order(monkeypatch):
     assert DowntimeSettings(anthropic_api_key="").resolved_api_key() == "from-anthropic-env"
     monkeypatch.delenv("ANTHROPIC_API_KEY")
     assert DowntimeSettings(anthropic_api_key="").resolved_api_key() == "from-epicvibe-env"
+
+
+# ---------------------------------------------------------------------------
+# Warm-up: load the weights before the clinician needs them
+# ---------------------------------------------------------------------------
+
+
+def routed_ollama(routes, **kwargs):
+    """An OllamaProvider whose MockTransport dispatches on the URL path.
+
+    The `ollama()` helper above replays one queue for every request, which is
+    fine for `/api/chat` but useless here: warm-up and the `ps` probe are
+    different endpoints with different bodies.
+    """
+    seen: list[tuple[str, dict | None]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content) if request.content else None
+        seen.append((request.url.path, body))
+        item = routes[request.url.path]
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    return OllamaProvider(client=client, **kwargs), seen
+
+
+async def test_warmup_loads_the_model_with_an_empty_prompt():
+    provider, seen = routed_ollama(
+        {"/api/generate": httpx.Response(200, json={"model": "gemma4:26b", "done": True,
+                                                    "response": ""})},
+        model="gemma4:26b", keep_alive="2h",
+    )
+    result = await provider.warmup()
+
+    path, body = seen[0]
+    assert path == "/api/generate"
+    # An empty prompt is the load-only call: it maps the weights in and returns
+    # without generating, and keep_alive is what makes the load stick.
+    assert body == {"model": "gemma4:26b", "prompt": "", "keep_alive": "2h"}
+    assert result["provider"] == "ollama:gemma4:26b"
+    assert result["loaded"] is True
+    assert result["keep_alive"] == "2h"
+    assert isinstance(result["elapsed_s"], float)
+
+
+async def test_warmup_maps_a_dead_daemon_to_a_provider_error():
+    provider, _ = routed_ollama(
+        {"/api/generate": httpx.ConnectError("connection refused")}, model="m")
+    with pytest.raises(OllamaProviderError) as excinfo:
+        await provider.warmup()
+    assert "cannot reach the Ollama daemon" in str(excinfo.value)
+    assert isinstance(excinfo.value, ProviderError)
+
+
+async def test_warmup_surfaces_an_http_error_body():
+    provider, _ = routed_ollama(
+        {"/api/generate": httpx.Response(404, text='{"error":"model \'nope\' not found"}')},
+        model="nope")
+    with pytest.raises(OllamaProviderError) as excinfo:
+        await provider.warmup()
+    assert "HTTP 404" in str(excinfo.value) and "nope" in str(excinfo.value)
+
+
+async def test_warmup_surfaces_a_200_error_envelope():
+    provider, _ = routed_ollama(
+        {"/api/generate": httpx.Response(200, json={"error": "out of memory"})}, model="m")
+    with pytest.raises(OllamaProviderError) as excinfo:
+        await provider.warmup()
+    assert "out of memory" in str(excinfo.value)
+
+
+async def test_is_loaded_reads_api_ps():
+    resident = {"models": [{"name": "gemma4:26b", "size_vram": 1}]}
+    provider, seen = routed_ollama({"/api/ps": httpx.Response(200, json=resident)},
+                                   model="gemma4:26b")
+    assert await provider.is_loaded() is True
+    assert seen[0][0] == "/api/ps"
+
+    other, _ = routed_ollama({"/api/ps": httpx.Response(200, json=resident)},
+                             model="qwen2.5:7b")
+    assert await other.is_loaded() is False
+
+
+async def test_is_loaded_matches_an_untagged_model_name():
+    provider, _ = routed_ollama(
+        {"/api/ps": httpx.Response(200, json={"models": [{"name": "gemma4:latest"}]})},
+        model="gemma4")
+    assert await provider.is_loaded() is True
+
+
+async def test_is_loaded_is_false_rather_than_raising_when_ollama_is_down():
+    # A status probe must never be the thing that breaks the status page.
+    for route in (httpx.ConnectError("refused"), httpx.Response(500, text="boom"),
+                  httpx.Response(200, text="not json")):
+        provider, _ = routed_ollama({"/api/ps": route}, model="m")
+        assert await provider.is_loaded() is False
+
+
+async def test_local_providers_warm_up_without_touching_anything():
+    fake = await KeywordFakeProvider().warmup()
+    assert fake == {"provider": "fake:keyword", "loaded": True, "elapsed_s": 0.0,
+                    "note": "deterministic extractor - no weights to load"}
+
+    # The hosted provider must not spend a billed request on a no-op: its stub
+    # client would record any call it made.
+    messages = StubMessages([])
+    hosted = AnthropicSdkProvider(api_key="k", client=SimpleNamespace(messages=messages))
+    result = await hosted.warmup()
+    assert result["loaded"] is True and result["elapsed_s"] == 0.0
+    assert messages.calls == []
