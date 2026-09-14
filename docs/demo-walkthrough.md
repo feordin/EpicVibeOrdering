@@ -166,12 +166,20 @@ until it's time to write back."
    mode"** banner.
 2. **Do:** From the **Load sample…** dropdown, pick `ed-cap-admission`.
 3. **Do:** Click **Generate orders**.
-   **Show:** Point at the confidence chip and the per-field **evidence chips**
-   quoting the transcript. **Call out** the red required-missing indicator on
-   any field the transcript didn't supply — most visibly, an order with no MRN
-   shown as a minted downtime identifier rather than a real one. Point at any
-   deferred/low-confidence order that starts **deselected** rather than silently
-   ordered.
+   **Show:** The guideline line under the template name (for CAP: *IDSA/ATS 2019
+   Diagnosis and Treatment of Adults with Community-acquired Pneumonia*), then the
+   three per-field **provenance chips**:
+   - **green**, quoting the transcript — the clinician said it; hover to read the quote;
+   - **grey "template default"** — nobody said it, it came out of the order set; hover
+     for the guideline note behind it;
+   - **red "not in transcript"** — a gap, with the input outlined in red.
+
+   **Say:** "Green is the clinician. Grey is the guideline. Red is a hole. None of the
+   three is the model inventing a dose."
+   **Call out** the red required-missing indicator on any field the transcript didn't
+   supply — most visibly, an order with no MRN shown as a minted downtime identifier
+   rather than a real one. Point at any deferred/low-confidence order that starts
+   **deselected** rather than silently ordered.
 4. **Do:** Click **Sign**.
 5. **Do:** Click **Preview HL7**.
    **Show:** The `ORM^O01` message. Call out: **MSH** (message header — sending
@@ -193,13 +201,75 @@ until it's time to write back."
 
 ---
 
+## 4b. Scenario A, fully offline variant (5 min) — nothing leaves the box
+
+The strongest version of Scenario A is the one you run with the Wi-Fi switched off.
+Everything — speech-to-text, the model, the order set, the HL7 — is on the laptop.
+
+### Before the room
+
+```bash
+export EPICVIBE_DOWNTIME_PROVIDER=ollama          # local weights, not a hosted model
+export EPICVIBE_DOWNTIME_OLLAMA_MODEL=...         # whatever `ollama list` shows
+export EPICVIBE_DOWNTIME_OFFLINE_STRICT=true      # refuse to start if anything is not local
+```
+
+(PowerShell: `$env:EPICVIBE_DOWNTIME_PROVIDER = "ollama"`, and so on.)
+
+Pre-cache the Whisper weights **while you still have internet** — transcribe the sample
+audio once, or point `EPICVIBE_DOWNTIME_WHISPER_MODEL_DIR` at a copied model directory.
+`GET /api/transcribe/status` reports `model_cached`. See `docs/runbook-demo.md` for the
+model-size trade-off and the exact cache path.
+
+Start the mock integration engine and the downtime app as usual (`:2575`, `:8200`).
+
+### Pre-flight (do this in front of them)
+
+1. **Do:** Open `http://localhost:8200/api/offline`.
+   **Show:** Four checks, all true — `provider_local`, `whisper_installed`,
+   `whisper_model_cached`, `engine_reachable` — and `all_local: true`.
+   **Say:** "That is not a promise, it's a check. With `OFFLINE_STRICT=true` the app
+   refuses to start at all if any of those is false, and tells you which."
+2. **Show:** The **LOCAL ONLY · STRICT** badge in the status bar. Hover it for the
+   checklist.
+3. **Do:** **Turn off Wi-Fi.** Leave it off for the rest of the scenario.
+
+### The run
+
+1. **Do:** In the transcript panel, pick **Transcribe sample audio…** →
+   `ed-cap-admission-excerpt` (or hit **● Record** and dictate a few lines yourself).
+   **Show:** The elapsed timer, then the transcript appearing in the box with model,
+   elapsed seconds and segment count. ~12–15 s for the 82-second sample.
+2. **Do:** Click **Generate orders**.
+   **Show:** The chips, as in step 3 above — green quotes, grey template defaults, red
+   gaps — with the IDSA/ATS 2019 guideline named under the template.
+3. **Do:** Fix anything the transcription got wrong, tick or untick orders, click
+   **Sign**, then **Preview HL7**.
+4. **Do:** **Mark EHR ONLINE**, then **Submit batch to EHR**.
+   **Show:** The ACKs coming back from the mock engine on `localhost:2575` — with the
+   network still off.
+
+### The two talking points
+
+- **Whisper mis-hears drug names, and that is the argument, not the objection.**
+  On this sample *ceftriaxone* comes back as "seftriaxone". Everything downstream is
+  built for that: the transcript is editable, every extracted value is chipped with its
+  evidence, and nothing becomes HL7 until a human signs it. A pipeline that hid the
+  transcription would be the dangerous one.
+- **The grey chips are not model output.** A "template default" is a value a human put
+  in the order set, traceable to a named, dated guideline — IDSA/ATS 2019 for this
+  template. The model's only job is to fill what the clinician actually said and to
+  leave the rest empty; the defaults are applied afterwards, by code, and labelled.
+
+---
+
 ## 5. Questions you will get
 
 | Question | Short answer |
 |---|---|
 | "Is this Epic?" | No — the mock EHR and downtime app are our own harnesses. They model the CDS Hooks/SMART/HL7 contracts closely enough to demo the full loop, but they're not Epic's catalog, BPA presentation, or governance model. The scenario diagrams distinguish what's **verified** on this stack from what's **believed** about Epic's side. |
 | "Does the AI compose doses?" | It proposes from the customer's own governance-approved order-set catalog — never invents details. Inside Epic's native ordering UI, Epic still composes the final order from its own SmartSet/preference-list defaults regardless of what we suggest. The SMART app is the one place the fully pre-populated values (and the clinician's edits) are visible end to end. |
-| "Where does PHI go?" | Online, no patient identifiers are sent to the model — the `demo`/`fake` providers here aren't models at all, and a real `anthropic` provider run is governed by the same design. Offline, downtime transcripts are gated by `EPICVIBE_DOWNTIME_ALLOW_PHI_TO_MODEL` — off by default, so a live-model downtime run refuses PHI-bearing transcripts unless explicitly enabled. |
+| "Where does PHI go?" | Online, no patient identifiers are sent to the model — the `demo`/`fake` providers here aren't models at all, and a real `anthropic` provider run is governed by the same design. Offline, downtime transcripts are gated by `EPICVIBE_DOWNTIME_ALLOW_PHI_TO_MODEL` — off by default, so a live-model downtime run refuses PHI-bearing transcripts unless explicitly enabled. For the strongest answer, run the fully offline variant (§4b): `EPICVIBE_DOWNTIME_OFFLINE_STRICT=true` makes the app refuse to start unless the model, the speech weights and the integration engine are all on-box, and `GET /api/offline` shows the per-item check. |
 | "What's needed for real Epic?" | A customer non-production Epic instance, an App Orchard/OPA record for the CDS Hooks + SMART app, JWT verification turned on (it's off by default here for local testing), and — for the downtime path — an actual Bridges/Rhapsody/Mirth inbound ORM interface stood up on the customer's integration engine. See `docs/runbook-demo.md` and `docs/spikes/fhir-order-writeback.md` for the specifics behind each of these. |
 
 ---

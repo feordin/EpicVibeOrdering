@@ -272,7 +272,9 @@ message under `--inbox`, and replies with `ACK^O01`. `--reject-every N` makes it
    - a **template selection** with confidence and alternatives (e.g. matches
      `chf-exacerbation-admission` — "Heart Failure Exacerbation - Admission" — with one
      or more alternative templates listed),
-   - **patient fields** with evidence chips quoting the transcript, and a red
+   - the **guideline** the template is derived from, printed under the template name
+     (e.g. "ACC/AHA/HFSA 2022 Guideline for the Management of Heart Failure"),
+   - **patient fields** with a provenance chip each (see below) and a red
      required-missing indicator on any required field with no value,
    - **orders grouped by category** (medication, lab, imaging, etc.) with dose/route/
      frequency parsed where the transcript stated them; deferred/low-confidence defaults
@@ -295,6 +297,127 @@ message under `--inbox`, and replies with `ACK^O01`. `--reject-every N` makes it
 11. To demo NACKs deliberately, restart the mock engine with
     `python -m epicvibe.downtime.mock_engine --reject-every 3` and submit a batch of 3+
     orders.
+
+### Field provenance: the three chips
+
+Every filled field carries a `source` — `transcript`, `default` or `none` — stamped by
+`validate_filled()` in `src/epicvibe/downtime/engine.py`, after the provider has
+answered and regardless of which provider answered. It is the one place the decision is
+made, so the `fake`, `ollama` and `anthropic` paths cannot disagree about it.
+
+| Chip | `source` | Means | Where the value came from |
+|---|---|---|---|
+| green, quoting the transcript | `transcript` | the clinician said it | the model, backed by a verbatim quote in `evidence` (hover to read it) |
+| grey, dashed, "template default" | `default` | nobody said it | the template's `defaults` for that order — a guideline-derived value written by a human. Hover for the order's `guideline_note` |
+| red, "not in transcript" | `none` | a gap | nowhere. Required gaps are also listed in `unresolved` and outline the input in red |
+
+Rules the post-validation enforces:
+
+- A value with a quote is `transcript`. The quote is checked against the actual
+  transcript, case- and whitespace-insensitively; if it is not there the value is
+  **kept** (the clinician has to see what the model produced in order to reject it) and
+  a `evidence not found verbatim` warning is added to the warnings banner.
+- A field the model left empty is back-filled from the template `defaults` and labelled
+  `default`. The fill prompt now tells the model this happens automatically, so it must
+  leave unsupported fields empty rather than guessing them.
+- **Patient fields never take a default.** There is no guideline-sanctioned guess for
+  someone's name, DOB or allergies — those stay `none` and show red.
+- Editing a field in the UI clears its chip: a value the clinician typed is neither a
+  transcript quote nor a template default.
+
+The guideline itself lives on the template JSON (`guideline: {name, organization, year,
+url}`) with an optional per-order `guideline_note`; the six fixtures cite IDSA/ATS 2019
+(CAP), ACC/AHA 2021 (chest pain), Surviving Sepsis Campaign 2021, ADA Standards of Care
+2025 (DKA and new T2DM) and ACC/AHA/HFSA 2022 (heart failure). This is the answer to
+"did the AI make that dose up?": a grey chip means the value came from a
+governance-approved order set, not from a model.
+
+### Offline-strict mode (`src/epicvibe/downtime/offline.py`)
+
+`GET /api/offline` returns a per-item checklist of everything in the deployment that
+could reach off-box, and `/api/status` carries the summary (`offline: {strict,
+all_local, not_local}`) that drives the **LOCAL ONLY** badge in the status bar.
+
+| Check | Passes when |
+|---|---|
+| `provider_local` | provider is `fake` or `ollama` — and for `ollama`, `ollama_base_url` points at a loopback or private address |
+| `whisper_installed` | `faster-whisper` is importable |
+| `whisper_model_cached` | the Whisper weights are already on disk, so no download is needed |
+| `engine_reachable` | the configured MLLP `engine_host:engine_port` is a loopback/private address **and** accepts a TCP connection (0.5 s timeout) |
+
+| Var | Default | Purpose |
+|---|---|---|
+| `EPICVIBE_DOWNTIME_OFFLINE_STRICT` | `false` | refuse to start unless every check above passes |
+
+With `STRICT=true`, `create_app()` raises a `RuntimeError` at startup listing exactly
+which items are not local, before it builds anything else — a loud failure on the
+projector beats a quiet egress at the bedside. The status bar then reads
+**LOCAL ONLY · STRICT**; without strict it reads **LOCAL ONLY** when everything passes,
+and names the failing items in muted text when it does not. Hover the badge for the
+full checklist either way.
+
+### Audio input (local Whisper, no network)
+
+Step 2 can start from audio instead of pasted text. Transcription runs entirely on the
+box — `faster-whisper` (CTranslate2, CPU int8), which is the point: a declared downtime
+is exactly when a cloud STT vendor is unavailable, and the audio is ambient PHI.
+
+Install the optional extra (once):
+
+```bash
+pip install -e ".[dev,audio]"
+```
+
+Without it the app still starts; the transcript panel just shows a muted install hint
+instead of the audio controls, and the endpoints answer `501`.
+
+In the **Ambient transcript** panel:
+
+- **● Record** — captures from the mic via `MediaRecorder` (webm/opus) with an elapsed
+  timer; **■ Stop** posts the clip and fills the textarea.
+- **Upload audio** — any wav/webm/ogg/mp3/m4a/flac file.
+- **Transcribe sample audio…** — `fixtures/downtime/audio/ed-cap-admission-excerpt.wav`,
+  an 82-second synthesized read of the CAP encounter, so the demo works with no mic.
+
+The result replaces the textarea contents (with a confirm if you have already typed
+something) and reports model, elapsed seconds, audio duration and segment count.
+Then continue at step 3 — **Generate orders** — as usual.
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/transcribe` | Raw audio bytes in the body (`Content-Type: audio/wav`, `audio/webm`, …) → `{text, segments, language, duration_s, model, elapsed_s}`. No multipart, so no extra dependency. |
+| `GET /api/transcribe/status` | `enabled` / `installed` / `model` / `model_cached` / sample names. |
+| `GET /api/transcripts/audio` | Lists the fixture audio files. |
+| `POST /api/transcribe/sample/{name}` | Transcribes one fixture file server-side. |
+
+Settings live in `src/epicvibe/downtime/transcribe.py` under prefix
+`EPICVIBE_DOWNTIME_WHISPER_`:
+
+| Var | Default | Notes |
+|---|---|---|
+| `ENABLED` | `true` | Set false to hide the controls and return `501`. |
+| `MODEL` | `small` | Any faster-whisper model id, or a path to converted weights. |
+| `MODEL_DIR` | unset | Pre-seeded weights directory — see offline note below. |
+| `LANGUAGE` | `en` | Skips language detection. |
+| `BEAM_SIZE` | `1` | Greedy; raise for accuracy at a CPU cost. |
+| `VAD_FILTER` | `true` | Drops silence before decoding. |
+
+**Weights and truly-offline boxes.** On first use the `small` model (~480 MB, int8
+CTranslate2) downloads from Hugging Face into
+`~/.cache/huggingface/hub/models--Systran--faster-whisper-small`
+(`%USERPROFILE%\.cache\huggingface\hub\...` on Windows). That is the only network
+call in the whole feature, and it never happens again. For a machine that will never
+have internet, copy that model directory onto the box and point
+`EPICVIBE_DOWNTIME_WHISPER_MODEL_DIR` at it: if the directory contains `model.bin` it is
+used as the model itself, otherwise it is used as the download root. `GET
+/api/transcribe/status` reports `model_cached` so you can confirm before the demo.
+
+Measured on this CPU: the 82-second sample transcribes in **~12-15 s** (roughly 6x
+realtime) with `small`/int8/beam 1. Quality on synthesized speech is good enough for the
+keyword extractor — "pneumonia", "azithromycin", "chest x-ray", "sputum" and the patient
+name all come through, and `/api/generate` still selects `ed-cap-admission`. Drug names
+are the weak spot: *ceftriaxone* comes back as "seftriaxone". That is exactly why the
+filled order set is reviewed and signed by a human before anything becomes HL7.
 
 ### Settings (`src/epicvibe/downtime/config.py`, prefix `EPICVIBE_DOWNTIME_`)
 
