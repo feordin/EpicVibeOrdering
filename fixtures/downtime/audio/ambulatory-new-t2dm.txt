@@ -1,0 +1,40 @@
+# Spoken script for ambulatory-new-t2dm.ogg (make_sample_audio.py v1.0.0).
+# Lines in [brackets] are stage directions from the source transcript and are NOT spoken.
+# Speaker labels are NOT spoken either - each speaker has its own voice; see the .voices.json.
+
+[Ambient capture — Riverbend Family Medicine Clinic, Exam Room 3 — EHR DOWNTIME IN EFFECT]
+MA: Dr. Sandoval, the patient is Ms. Yolanda Pritchard in Exam Room 3. Date of birth 1979-06-21, female. Weight is 91 kg, blood pressure 138 over 84, heart rate 78. Her fasting finger stick in the office today is 214.
+DR. SANDOVAL: Thanks. Ms. Pritchard, how have you been?
+PATIENT: Tired all the time. And I'm up three or four times a night to pee, which I never used to do.
+DR. SANDOVAL: Any increased thirst?
+PATIENT: I'm drinking water constantly. My mouth is always dry.
+DR. SANDOVAL: Any change in your vision?
+PATIENT: It's been blurry off and on for a couple months. I figured I needed new glasses.
+DR. SANDOVAL: Any weight change?
+PATIENT: I lost about eight pounds without trying. I thought that was a good thing.
+DR. SANDOVAL: Any numbness or tingling in your feet?
+PATIENT: A little burning at night, both feet.
+DR. SANDOVAL: Any family history of diabetes?
+PATIENT: My mother and both her sisters.
+DR. SANDOVAL: Do you have any drug allergies?
+PATIENT: No known drug allergies.
+DR. SANDOVAL: Let me take a look at your feet. [pause] Pulses are intact, sensation to monofilament is preserved at all sites, no ulcers or calluses. Skin is dry. No acanthosis on the neck.
+DR. SANDOVAL: Ms. Pritchard, your fasting sugar today is 214, and with the thirst, the urination, the blurry vision and the weight loss, this is new type 2 diabetes. Not a borderline reading — this is a diagnosis.
+PATIENT: I was afraid you'd say that.
+DR. SANDOVAL: It is very manageable, and we are starting today. Let's do this.
+DR. SANDOVAL: Orders — hemoglobin A1c, a comprehensive metabolic panel, a fasting lipid panel, and a urine albumin-to-creatinine ratio. All routine, she can go to the lab downstairs.
+MA: A1c, CMP, fasting lipid, microalbumin.
+DR. SANDOVAL: Start metformin 500 mg by mouth daily, taken with dinner, and we'll titrate to twice daily over two weeks if she tolerates it.
+MA: Metformin 500 daily, titrate to BID over two weeks.
+DR. SANDOVAL: Ms. Pritchard, the most common side effect is an upset stomach, which is why we start low and go slow. Take it with food.
+PATIENT: Okay.
+DR. SANDOVAL: Order a glucometer with test strips and lancets, and I want her checking a fasting sugar daily and writing it down.
+MA: Glucometer, fasting daily.
+DR. SANDOVAL: Refer her to the diabetes educator and the dietitian, and place a referral to ophthalmology for a dilated retinal exam.
+MA: Dietitian and ophthalmology.
+DR. SANDOVAL: Carbohydrate-modified diet counseling, and exercise as tolerated — start with a twenty minute walk most days.
+DR. SANDOVAL: Follow up with me in three months with a repeat A1c.
+MA: Follow-up in three months.
+DR. SANDOVAL: Hold off on the statin until I see the lipid panel.
+DR. SANDOVAL: Our charting system is down today, so all of this is going into the downtime ordering tool and will be filed to her chart when it's back up.
+[End of capture]

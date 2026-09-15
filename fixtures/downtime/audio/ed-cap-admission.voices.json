@@ -1,0 +1,28 @@
+{
+  "generator": "scripts/make_sample_audio.py",
+  "generator_version": "1.0.0",
+  "source_transcript": "fixtures/downtime/transcripts/ed-cap-admission.txt",
+  "audio": "ed-cap-admission.ogg",
+  "codec": "libopus",
+  "container": "ogg",
+  "sample_rate_hz": 24000,
+  "bit_rate_bps": 24000,
+  "channels": 1,
+  "duration_s": 219.13,
+  "bytes": 555492,
+  "turns": 26,
+  "voices": {
+    "NURSE": {
+      "voice": "en-US-MichelleNeural",
+      "rate": "+0%"
+    },
+    "DR. ALVAREZ": {
+      "voice": "en-US-ChristopherNeural",
+      "rate": "+0%"
+    },
+    "PATIENT": {
+      "voice": "en-US-RogerNeural",
+      "rate": "-10%"
+    }
+  }
+}

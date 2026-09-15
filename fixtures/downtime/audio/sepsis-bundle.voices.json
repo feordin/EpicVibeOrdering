@@ -1,0 +1,28 @@
+{
+  "generator": "scripts/make_sample_audio.py",
+  "generator_version": "1.0.0",
+  "source_transcript": "fixtures/downtime/transcripts/sepsis-bundle.txt",
+  "audio": "sepsis-bundle.ogg",
+  "codec": "libopus",
+  "container": "ogg",
+  "sample_rate_hz": 24000,
+  "bit_rate_bps": 24000,
+  "channels": 1,
+  "duration_s": 204.99,
+  "bytes": 555065,
+  "turns": 24,
+  "voices": {
+    "CHARGE NURSE": {
+      "voice": "en-US-AvaNeural",
+      "rate": "+0%"
+    },
+    "DR. WHITFIELD": {
+      "voice": "en-US-AndrewNeural",
+      "rate": "+0%"
+    },
+    "PARAMEDIC": {
+      "voice": "en-IE-ConnorNeural",
+      "rate": "+0%"
+    }
+  }
+}

@@ -2,8 +2,9 @@
 
 The unit tests stub `faster_whisper.WhisperModel` so nothing is downloaded and
 nothing is decoded - they exercise the wiring, not the acoustic model. The one
-integration test at the bottom runs the real thing against the fixture WAV and
-is skipped whenever faster-whisper or the weights are not available.
+integration test at the bottom runs the real thing against the multi-speaker
+fixture Opus clip and is skipped whenever faster-whisper or the weights are not
+available.
 """
 
 import sys
@@ -21,7 +22,7 @@ REPO = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO / "fixtures" / "downtime" / "templates"
 TRANSCRIPT_DIR = REPO / "fixtures" / "downtime" / "transcripts"
 AUDIO_DIR = REPO / "fixtures" / "downtime" / "audio"
-SAMPLE_WAV = AUDIO_DIR / "ed-cap-admission-excerpt.wav"
+SAMPLE_OGG = AUDIO_DIR / "ed-cap-admission.ogg"
 
 
 # --- stubs -----------------------------------------------------------------
@@ -162,7 +163,7 @@ def test_status_endpoint_reports_availability(tmp_path, stub_whisper):
         body = c.get("/api/transcribe/status").json()
     assert body["enabled"] is True and body["installed"] is True
     assert body["model"] == "tiny.en" and body["loaded"] is False
-    assert "ed-cap-admission-excerpt" in body["samples"]
+    assert "ed-cap-admission" in body["samples"]
 
 
 def test_post_transcribe_returns_text(tmp_path, stub_whisper):
@@ -189,11 +190,32 @@ def test_audio_sample_listing_and_transcription(tmp_path, stub_whisper):
     with _client(tmp_path, t) as c:
         listing = c.get("/api/transcripts/audio").json()
         names = [a["name"] for a in listing]
-        assert "ed-cap-admission-excerpt" in names
-        assert all(a["content_type"] == "audio/wav" for a in listing if a["name"] in names)
-        r = c.post("/api/transcribe/sample/ed-cap-admission-excerpt")
+        assert "ed-cap-admission" in names
+        assert all(a["content_type"] == "audio/ogg" for a in listing)
+        assert all(a["filename"].endswith(".ogg") for a in listing)
+        # the .voices.json sidecars make the dropdown label useful
+        assert all(a["duration_s"] > 60 and a["speakers"] >= 3 for a in listing)
+        r = c.post("/api/transcribe/sample/ed-cap-admission")
         assert r.status_code == 200 and "Bennett" in r.json()["text"]
         assert c.post("/api/transcribe/sample/nope").status_code == 404
+
+
+def test_every_transcript_fixture_has_multi_speaker_audio():
+    """`scripts/make_sample_audio.py` must have been run for all six scenarios."""
+    import json
+
+    names = sorted(p.stem for p in TRANSCRIPT_DIR.glob("*.txt"))
+    assert len(names) == 6
+    for name in names:
+        clip = AUDIO_DIR / f"{name}.ogg"
+        meta_path = AUDIO_DIR / f"{name}.voices.json"
+        assert clip.is_file(), f"missing sample audio for {name}"
+        assert (AUDIO_DIR / f"{name}.txt").is_file()
+        assert clip.stat().st_size < 1_500_000, f"{name}.ogg is too big to commit"
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        assert meta["codec"] == "libopus" and meta["channels"] == 1
+        assert meta["duration_s"] > 60
+        assert len(meta["voices"]) >= 3, f"{name} should have 3+ distinct speakers"
 
 
 def test_missing_audio_dir_lists_nothing(tmp_path, stub_whisper):
@@ -211,7 +233,7 @@ def test_501_when_faster_whisper_is_not_installed(tmp_path, monkeypatch):
                    headers={"content-type": "audio/wav"})
         assert r.status_code == 501
         assert "faster-whisper" in r.json()["detail"]
-        assert c.post("/api/transcribe/sample/ed-cap-admission-excerpt").status_code == 501
+        assert c.post("/api/transcribe/sample/ed-cap-admission").status_code == 501
         assert c.get("/api/transcribe/status").json()["installed"] is False
 
 
@@ -236,23 +258,27 @@ def test_transcription_endpoints_do_not_disturb_the_rest_of_the_api(tmp_path, st
 
 _real_settings = tr.TranscribeSettings()
 _skip_real = pytest.mark.skipif(
-    not (SAMPLE_WAV.exists()
+    not (SAMPLE_OGG.exists()
          and tr.faster_whisper_installed()
          and tr.model_cached(_real_settings)),
-    reason="needs the audio extra, the fixture WAV, and cached Whisper weights",
+    reason="needs the audio extra, the fixture audio, and cached Whisper weights",
 )
 
 
 @_skip_real
-def test_real_whisper_transcribes_the_sample_wav(tmp_path):
+def test_real_whisper_transcribes_the_sample_ogg(tmp_path):
     t = tr.Transcriber(tr.TranscribeSettings())
     with _client(tmp_path, t) as c:
-        r = c.post("/api/transcribe/sample/ed-cap-admission-excerpt")
+        r = c.post("/api/transcribe/sample/ed-cap-admission")
     assert r.status_code == 200
     body = r.json()
     lower = body["text"].lower()
+    # The three words the CAP order set hangs on. `medium` gets all of them on
+    # this clip; `small` drops the first syllable of "ceftriaxone" - see the
+    # measured table in docs/runbook-demo.md.
     assert "pneumonia" in lower
-    assert "ceftriaxone" in lower or "bennett" in lower
+    assert "bennett" in lower
+    assert "ceftriaxone" in lower or "triaxone" in lower
     assert body["language"] == "en"
-    assert body["duration_s"] > 30
+    assert body["duration_s"] > 120, "the multi-speaker clip runs about 3.5 minutes"
     assert body["segments"]

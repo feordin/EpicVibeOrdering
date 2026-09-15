@@ -1,0 +1,28 @@
+{
+  "generator": "scripts/make_sample_audio.py",
+  "generator_version": "1.0.0",
+  "source_transcript": "fixtures/downtime/transcripts/ambulatory-new-t2dm.txt",
+  "audio": "ambulatory-new-t2dm.ogg",
+  "codec": "libopus",
+  "container": "ogg",
+  "sample_rate_hz": 24000,
+  "bit_rate_bps": 24000,
+  "channels": 1,
+  "duration_s": 226.87,
+  "bytes": 569611,
+  "turns": 35,
+  "voices": {
+    "MA": {
+      "voice": "en-NZ-MollyNeural",
+      "rate": "+0%"
+    },
+    "DR. SANDOVAL": {
+      "voice": "en-US-SteffanNeural",
+      "rate": "+0%"
+    },
+    "PATIENT": {
+      "voice": "en-CA-ClaraNeural",
+      "rate": "+0%"
+    }
+  }
+}

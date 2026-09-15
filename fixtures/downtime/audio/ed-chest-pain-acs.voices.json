@@ -1,0 +1,32 @@
+{
+  "generator": "scripts/make_sample_audio.py",
+  "generator_version": "1.0.0",
+  "source_transcript": "fixtures/downtime/transcripts/ed-chest-pain-acs.txt",
+  "audio": "ed-chest-pain-acs.ogg",
+  "codec": "libopus",
+  "container": "ogg",
+  "sample_rate_hz": 24000,
+  "bit_rate_bps": 24000,
+  "channels": 1,
+  "duration_s": 197.86,
+  "bytes": 524383,
+  "turns": 29,
+  "voices": {
+    "TRIAGE NURSE": {
+      "voice": "en-US-GuyNeural",
+      "rate": "+0%"
+    },
+    "NURSE": {
+      "voice": "en-US-GuyNeural",
+      "rate": "+0%"
+    },
+    "DR. OKAFOR": {
+      "voice": "en-GB-SoniaNeural",
+      "rate": "+0%"
+    },
+    "PATIENT": {
+      "voice": "en-US-EmmaNeural",
+      "rate": "+0%"
+    }
+  }
+}

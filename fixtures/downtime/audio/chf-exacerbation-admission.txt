@@ -1,0 +1,35 @@
+# Spoken script for chf-exacerbation-admission.ogg (make_sample_audio.py v1.0.0).
+# Lines in [brackets] are stage directions from the source transcript and are NOT spoken.
+# Speaker labels are NOT spoken either - each speaker has its own voice; see the .voices.json.
+
+[Ambient capture — Cardiology Admitting Unit, Room 415 — EHR DOWNTIME IN EFFECT]
+NURSE: Dr. Lindqvist, this is Mr. Walter Brzezinski in Room 415. Date of birth 1946-11-02, male. He weighs 94 kg today. Blood pressure 148 over 88, heart rate 92 and irregular, respiratory rate 24, sat 91 on room air.
+DR. LINDQVIST: Mr. Brzezinski, good evening. What brought you in?
+PATIENT: My legs have blown up like balloons and I can't lie flat. I've been sleeping in the recliner for a week.
+DR. LINDQVIST: How many pillows before that?
+PATIENT: One. Now I can't even do three.
+DR. LINDQVIST: Are you waking up at night gasping?
+PATIENT: Twice last night. I have to hang my legs off the bed.
+DR. LINDQVIST: That's paroxysmal nocturnal dyspnea. How much weight have you gained?
+PATIENT: My scale says twelve pounds in ten days. I weigh myself most mornings.
+DR. LINDQVIST: Are you taking your water pill?
+PATIENT: I ran out of the furosemide about two weeks ago and I kept meaning to call.
+DR. LINDQVIST: Any allergies?
+PATIENT: I'm allergic to codeine. It makes me vomit.
+DR. LINDQVIST: Any chest pain?
+PATIENT: No pain. Just the breathing and the legs.
+DR. LINDQVIST: Let me examine you. [pause] Jugular venous distension up to the angle of the jaw sitting up. Crackles at both bases about a third of the way up. Heart is irregularly irregular. Three-plus pitting edema to the mid thigh bilaterally. Liver edge is palpable and tender.
+DR. LINDQVIST: This is an acute heart failure exacerbation with volume overload, most likely from stopping the diuretic, and he's in atrial fibrillation. We're admitting.
+NURSE: Telemetry bed is ready.
+DR. LINDQVIST: Good. Orders — furosemide 40 mg IV twice daily. Daily weights, same scale, before breakfast. Strict intake and output. Continuous cardiac telemetry. Two-gram sodium diet, and he's up with assistance only.
+NURSE: Furosemide 40 IV BID, daily weights, strict I and O, telemetry, two-gram sodium.
+DR. LINDQVIST: Labs — a BNP, a basic metabolic panel daily, and a CBC with differential. Also send a magnesium, routine.
+NURSE: BNP, daily BMP, CBC, magnesium.
+DR. LINDQVIST: Imaging — chest X-ray, two views, and a transthoracic echocardiogram with Doppler, urgent. I want to know his ejection fraction before we adjust anything else. Twelve-lead ECG as well, given the atrial fibrillation.
+NURSE: Echo urgent. Do you want a fluid restriction?
+DR. LINDQVIST: Yes — fluid restriction, 1.5 liters per day.
+NURSE: Troponin?
+DR. LINDQVIST: He has no chest pain and no ischemic story, so no troponin for now. And hold the carvedilol until he's diuresed — I don't want to negative inotrope him while he's this wet.
+DR. LINDQVIST: Mr. Brzezinski, our ordering system is down, so I'm capturing all of this in the downtime application and it will be filed once Epic is back.
+PATIENT: As long as I can breathe, doc.
+[End of capture]

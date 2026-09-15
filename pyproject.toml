@@ -19,6 +19,10 @@ dev = ["pytest>=8", "pytest-asyncio>=0.23"]
 # Fully local speech-to-text for the downtime capture UI. CTranslate2 runs
 # Whisper on CPU at int8 -- no GPU, and no network once the weights are cached.
 audio = ["faster-whisper>=1.1"]
+# Fixture-authoring tools. Never needed to run, demo or test the app - only to
+# regenerate the committed sample audio with scripts/make_sample_audio.py, which
+# is the one thing in this repo that talks to the internet.
+tools = ["edge-tts>=7"]
 
 [build-system]
 requires = ["setuptools>=68"]

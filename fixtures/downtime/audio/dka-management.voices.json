@@ -1,0 +1,28 @@
+{
+  "generator": "scripts/make_sample_audio.py",
+  "generator_version": "1.0.0",
+  "source_transcript": "fixtures/downtime/transcripts/dka-management.txt",
+  "audio": "dka-management.ogg",
+  "codec": "libopus",
+  "container": "ogg",
+  "sample_rate_hz": 24000,
+  "bit_rate_bps": 24000,
+  "channels": 1,
+  "duration_s": 211.76,
+  "bytes": 531725,
+  "turns": 28,
+  "voices": {
+    "RESIDENT": {
+      "voice": "en-CA-LiamNeural",
+      "rate": "+0%"
+    },
+    "DR. NAKAMURA": {
+      "voice": "en-US-JennyNeural",
+      "rate": "+0%"
+    },
+    "PATIENT": {
+      "voice": "en-AU-NatashaNeural",
+      "rate": "-5%"
+    }
+  }
+}

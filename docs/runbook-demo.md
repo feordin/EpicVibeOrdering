@@ -416,8 +416,35 @@ In the **Ambient transcript** panel:
 - **● Record** — captures from the mic via `MediaRecorder` (webm/opus) with an elapsed
   timer; **■ Stop** posts the clip and fills the textarea.
 - **Upload audio** — any wav/webm/ogg/mp3/m4a/flac file.
-- **Transcribe sample audio…** — `fixtures/downtime/audio/ed-cap-admission-excerpt.wav`,
-  an 82-second synthesized read of the CAP encounter, so the demo works with no mic.
+- **Transcribe sample audio…** — one entry per scenario, so the demo works with no
+  mic. Each is a multi-speaker Opus clip (mono, 24 kHz, 24 kbps) of the matching
+  `fixtures/downtime/transcripts/*.txt`, with a distinct neural voice per speaker and
+  no voice reused across the six files. The dropdown shows length, speaker count and
+  size.
+
+| File | Length | Size | Turns | Cast (speaker → neural voice) |
+|---|---|---|---|---|
+| `ambulatory-new-t2dm.ogg` | 3:47 | 556 KB | 35 | `MA` en-NZ-MollyNeural<br>`DR. SANDOVAL` en-US-SteffanNeural<br>`PATIENT` en-CA-ClaraNeural |
+| `chf-exacerbation-admission.ogg` | 3:47 | 544 KB | 30 | `NURSE` en-US-EricNeural<br>`DR. LINDQVIST` en-US-AriaNeural<br>`PATIENT` en-GB-ThomasNeural (-10%) |
+| `dka-management.ogg` | 3:32 | 519 KB | 28 | `RESIDENT` en-CA-LiamNeural<br>`DR. NAKAMURA` en-US-JennyNeural<br>`PATIENT` en-AU-NatashaNeural (-5%) |
+| `ed-cap-admission.ogg` | 3:39 | 542 KB | 26 | `NURSE` en-US-MichelleNeural<br>`DR. ALVAREZ` en-US-ChristopherNeural<br>`PATIENT` en-US-RogerNeural (-10%) |
+| `ed-chest-pain-acs.ogg` | 3:18 | 512 KB | 29 | `TRIAGE NURSE` en-US-GuyNeural<br>`NURSE` en-US-GuyNeural<br>`DR. OKAFOR` en-GB-SoniaNeural<br>`PATIENT` en-US-EmmaNeural |
+| `sepsis-bundle.ogg` | 3:25 | 542 KB | 24 | `CHARGE NURSE` en-US-AvaNeural<br>`DR. WHITFIELD` en-US-AndrewNeural<br>`PARAMEDIC` en-IE-ConnorNeural |
+
+Every clip has two sidecars: `<name>.txt`, the spoken script (bracketed stage
+directions and the speaker labels are in the file but are *not* spoken — the voices
+carry that), and `<name>.voices.json`, the cast, duration and generator version.
+Regenerate them all with
+
+```bash
+pip install -e ".[tools]"                      # edge-tts, dev-only
+.venv/Scripts/python scripts/make_sample_audio.py
+```
+
+`scripts/make_sample_audio.py` reaches Microsoft's speech endpoint, so it needs
+internet — but only at fixture-generation time. The clips are committed; the demo and
+the test suite never reach the network for audio, and `edge-tts` is not a runtime
+dependency (it lives in the `tools` extra).
 
 The result replaces the textarea contents (with a confirm if you have already typed
 something) and reports model, elapsed seconds, audio duration and segment count.
@@ -456,28 +483,52 @@ slower box — see the measured comparison below.
 
 <!-- RUNBOOK_WHISPER_BENCHMARK_START -->
 Measured on this CPU (`faster-whisper`, CPU int8, `beam_size=1`, `vad_filter=true` —
-the same settings `Transcriber` uses), on the 82-second sample
-`fixtures/downtime/audio/ed-cap-admission-excerpt.wav`. WER is a rough word-level edit
-distance against `fixtures/downtime/audio/ed-cap-admission-excerpt.txt`; word checks are
-case-insensitive substring matches against the transcribed text.
+the same settings `Transcriber` uses), on the six committed samples. Model load was
+4.5 s, once, and is shared across all of them. WER is a rough word-level edit distance
+against each clip's spoken reference — the `<name>.txt` sidecar with the comment
+header, the bracketed stage directions and the `SPEAKER:` prefixes removed. "Template"
+is what `DowntimeEngine` + the keyword provider selected from the *transcribed* text,
+not from the source transcript.
 
-| Model | Load (s) | Transcribe (s) | WER | ceftriaxone | azithromycin | Bennett | NURSE | room air | titrate | CBC |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `small` | 1.7 | 6.3 | 0.143 | miss (`seftriaxone`) | OK | OK | miss (`NERS`) | miss (`Rumaeur`) | miss (`tight rate`) | OK |
-| `medium` | 17.9 | 16.5 | 0.117 | OK | OK | OK | miss (`NURS`) | OK | OK | OK |
+| Sample (`medium`) | Audio | Transcribe | WER | Template selected | Confidence | Notable mis-hears |
+|---|---|---|---|---|---|---|
+| `ambulatory-new-t2dm` | 3:47 | 62.2 s | 0.033 | `ambulatory-new-t2dm` | high | — |
+| `chf-exacerbation-admission` | 3:47 | 49.4 s | 0.055 | `chf-exacerbation-admission` | high | — |
+| `dka-management` | 3:32 | 60.7 s | 0.067 | `dka-management` | high | *ondansetron* → "Dansatron" |
+| `ed-cap-admission` | 3:39 | 53.5 s | 0.048 | `ed-cap-admission` | high | — |
+| `ed-chest-pain-acs` | 3:18 | 48.6 s | 0.047 | `ed-chest-pain-acs` | high | *nitroglycerin* → "nitroblisserin" (the second, "hold the nitro", is correct) |
+| `sepsis-bundle` | 3:25 | 49.4 s | 0.107 | `sepsis-bundle` | high | *cefepime* → "Cephapeem"; *Oyelaran* → "O'Yelleran" |
 
-`small` mangles the two drug names and drops "room air" / "titrate" entirely; `medium`
-gets every drug and clinical term right except the capitalized "NURSE" speaker label
-(transcribed as "NURS"/"NERS" either way — a capitalization/ASR-of-a-fragment artifact,
-not a missed word). `medium` costs roughly 2.6x the transcribe time of `small` for a
-lower WER and the recognitions that matter for order generation, which is why it is now
-the default; set `EPICVIBE_DOWNTIME_WHISPER_MODEL=small` to trade that back for speed.
+**All six templates are selected correctly, at high confidence, from the transcribed
+text** — which is the number that matters: the ASR is good enough that step 2 of the
+pipeline lands on the right order set without a human touching the transcript first.
+
+Every remaining error is a drug name or an unusual surname: `cefepime`, `ondansetron`,
+`nitroglycerin`, `Oyelaran`. (It gets `Brzezinski`, `Raghavan`, `Castellano` and
+`Pritchard` right.) Everything else — doses,
+routes, frequencies, "blood cultures before antibiotics", "thirty mLs per kilogram",
+"two-gram sodium" — comes through. Whisper also reliably renders spelled-out
+abbreviations phonetically ("Q SOFA", "I and O", "A1c" as "A1C"), which the keyword
+extractor is tolerant of.
+
+**`small` vs `medium` on the pneumonia file** (same settings, same clip):
+
+| Model | Load (s) | Transcribe (s) | WER | ceftriaxone | azithromycin | Bennett | pneumonia |
+|---|---|---|---|---|---|---|---|
+| `small` | 4.4 | 17.3 | 0.050 | miss (`…triaxone`) | OK | OK | OK |
+| `medium` | 4.5 | 53.5 | 0.048 | OK | OK | OK | OK |
+
+`small` is ~3x faster and costs one drug name — it drops the leading syllable of
+*ceftriaxone*. `medium` is the default because the drug names are the point; set
+`EPICVIBE_DOWNTIME_WHISPER_MODEL=small` to trade that back for speed on a slow box.
+
+Regenerate these numbers with `scripts/make_sample_audio.py` (audio) and a transcribe
+pass over `fixtures/downtime/audio/*.ogg`.
 <!-- RUNBOOK_WHISPER_BENCHMARK_END -->
 
-Quality on synthesized speech is good enough for the keyword extractor —
-"pneumonia", "azithromycin", "chest x-ray", "sputum" and the patient name all come
-through, and `/api/generate` still selects `ed-cap-admission`. That is exactly why the
-filled order set is reviewed and signed by a human before anything becomes HL7.
+Quality on synthesized speech is good enough for the keyword extractor, but it is
+not perfect, and that is exactly why the filled order set is reviewed and signed by a
+human before anything becomes HL7.
 
 ### Settings (`src/epicvibe/downtime/config.py`, prefix `EPICVIBE_DOWNTIME_`)
 

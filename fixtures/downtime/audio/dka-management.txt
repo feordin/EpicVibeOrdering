@@ -1,0 +1,33 @@
+# Spoken script for dka-management.ogg (make_sample_audio.py v1.0.0).
+# Lines in [brackets] are stage directions from the source transcript and are NOT spoken.
+# Speaker labels are NOT spoken either - each speaker has its own voice; see the .voices.json.
+
+[Ambient capture — Medical Intensive Care Unit, Room 8 — EHR DOWNTIME IN EFFECT]
+RESIDENT: Dr. Nakamura, this is Ms. Priya Raghavan in MICU Room 8, admitted from the emergency department twenty minutes ago. She's 23, female, and she weighs 58 kg. Her point-of-care glucose is 612. Venous pH 7.09, bicarbonate 8, anion gap 28, potassium 5.4. Beta-hydroxybutyrate is pending.
+DR. NAKAMURA: Type 1 diabetic?
+RESIDENT: Type 1 since age eleven. She ran out of insulin four days ago — she told triage the pharmacy couldn't fill it.
+DR. NAKAMURA: Ms. Raghavan, how are you feeling?
+PATIENT: Awful. I can't stop throwing up and I'm so thirsty. I've been in the bathroom all night.
+DR. NAKAMURA: Any belly pain?
+PATIENT: All over. It's been cramping since yesterday.
+DR. NAKAMURA: Allergies to any medications?
+PATIENT: No known drug allergies.
+DR. NAKAMURA: Let me examine you. [pause] She's breathing deep and fast — that's Kussmaul respiration. Mucous membranes are dry, skin turgor poor. Abdomen is diffusely tender without guarding or rebound. She's alert and oriented, which is reassuring.
+DR. NAKAMURA: This is diabetic ketoacidosis from insulin interruption. Let's run the protocol.
+RESIDENT: Ready.
+DR. NAKAMURA: Start a regular insulin infusion at 0.1 units per kilogram per hour. Do not give a bolus. Normal saline one liter bolus now, then normal saline maintenance at 250 mLs an hour.
+RESIDENT: Insulin drip 0.1 units per kilo per hour, one liter bolus, then maintenance at 250 an hour.
+DR. NAKAMURA: Her potassium is 5.4, so hold the potassium chloride for now — recheck in two hours and start 20 milliequivalents IV every four hours once she drops below 5.0. Add dextrose 5 percent to the fluids when her glucose falls under 250.
+RESIDENT: Hold the KCl initially. Understood.
+DR. NAKAMURA: Labs: basic metabolic panel every two hours, a venous blood gas, beta-hydroxybutyrate, CBC with differential, and a urinalysis with ketones. Point-of-care glucose every hour.
+RESIDENT: Every hour on the glucose.
+DR. NAKAMURA: Twelve-lead ECG for the hyperkalemia — urgent, not STAT. Strict intake and output. Keep her NPO until the gap closes and she's not vomiting.
+RESIDENT: NPO, strict I and O, ECG.
+DR. NAKAMURA: Give ondansetron 4 mg IV every eight hours as needed for the nausea.
+PATIENT: Please, yes.
+DR. NAKAMURA: And consult endocrinology in the morning — she needs a real discharge plan and an insulin supply, otherwise she's back here next week.
+RESIDENT: Do you want neuro checks?
+DR. NAKAMURA: She's alert and oriented and she's an adult, so cerebral edema risk is low. Skip the neuro checks.
+DR. NAKAMURA: All of this is going into the downtime capture tool. Ms. Raghavan, the hospital's computer system is down but nothing about your care changes.
+PATIENT: Okay.
+[End of capture]

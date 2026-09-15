@@ -278,9 +278,22 @@ def create_app(
 
     @app.get("/api/transcripts/audio")
     async def audio_samples() -> list[dict]:
-        return [{"name": p.stem, "filename": p.name, "bytes": p.stat().st_size,
-                 "content_type": AUDIO_SUFFIXES[p.suffix.lower()]}
-                for p in _audio_files()]
+        out = []
+        for p in _audio_files():
+            entry = {"name": p.stem, "filename": p.name, "bytes": p.stat().st_size,
+                     "content_type": AUDIO_SUFFIXES[p.suffix.lower()]}
+            # scripts/make_sample_audio.py drops a sidecar next to each clip with
+            # the cast and the duration; purely cosmetic, so a bad one is ignored.
+            sidecar = p.with_suffix(".voices.json")
+            if sidecar.is_file():
+                try:
+                    meta = json.loads(sidecar.read_text(encoding="utf-8"))
+                    entry["duration_s"] = float(meta["duration_s"])
+                    entry["speakers"] = len(meta.get("voices", {}))
+                except (ValueError, KeyError, TypeError, OSError):
+                    pass
+            out.append(entry)
+        return out
 
     @app.post("/api/transcribe/sample/{name}")
     async def transcribe_sample(name: str) -> dict:
@@ -780,7 +793,14 @@ async function bootAudio() {
   (await api("/api/transcripts/audio")).forEach(a => {
     const o = document.createElement("option");
     o.value = a.name;
-    o.textContent = `${a.name} (${(a.bytes/1048576).toFixed(1)} MB)`;
+    const bits = [];
+    if (a.duration_s) {
+      const s = Math.round(a.duration_s);
+      bits.push(`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`);
+    }
+    if (a.speakers) bits.push(`${a.speakers} voices`);
+    bits.push(`${Math.round(a.bytes/1024)} KB`);
+    o.textContent = `${a.name} — ${bits.join(" · ")}`;
     sel.appendChild(o);
   });
   sttMsg(`<span class="muted">local Whisper · model ${esc(st.model)}` +

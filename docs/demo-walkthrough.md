@@ -267,9 +267,14 @@ curl -X POST http://localhost:8200/api/warmup                                 # 
 ### The run
 
 1. **Do:** In the transcript panel, pick **Transcribe sample audio…** →
-   `ed-cap-admission-excerpt` (or hit **● Record** and dictate a few lines yourself).
+   `ed-cap-admission` (or hit **● Record** and dictate a few lines yourself).
    **Show:** The elapsed timer, then the transcript appearing in the box with model,
-   elapsed seconds and segment count. ~12–15 s for the 82-second sample.
+   elapsed seconds and segment count. The six samples are multi-speaker — nurse,
+   physician and patient each have their own voice — and run 3–4 minutes, so budget
+   roughly a minute of CPU for the `medium` model. Pick a shorter run by setting
+   `EPICVIBE_DOWNTIME_WHISPER_MODEL=small` if you are demoing on a slow laptop; the
+   other five scenarios (CHF, DKA, ACS, sepsis, new T2DM) are in the same menu if the
+   room asks for something other than pneumonia.
 2. **Do:** Click **Generate orders**.
    **Show:** The chips, as in step 3 above — green quotes, grey template defaults, red
    gaps — with the IDSA/ATS 2019 guideline named under the template.
@@ -282,9 +287,10 @@ curl -X POST http://localhost:8200/api/warmup                                 # 
 ### The two talking points
 
 - **Whisper mis-hears drug names, and that is the argument, not the objection.**
-  On this sample *ceftriaxone* comes back as "seftriaxone". Everything downstream is
-  built for that: the transcript is editable, every extracted value is chipped with its
-  evidence, and nothing becomes HL7 until a human signs it. A pipeline that hid the
+  On this sample the `small` model hears *ceftriaxone* as "seftriaxone", and even
+  `medium` garbles a surname or two. Everything downstream is built for that: the
+  transcript is editable, every extracted value is chipped with its evidence, and
+  nothing becomes HL7 until a human signs it. A pipeline that hid the
   transcription would be the dangerous one.
 - **The grey chips are not model output.** A "template default" is a value a human put
   in the order set, traceable to a named, dated guideline — IDSA/ATS 2019 for this
